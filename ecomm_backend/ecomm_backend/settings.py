@@ -194,3 +194,13 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
 }
+
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Stripe Configuration
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51HQc1dLBtka0EnE3pupg6YOVLf7mm1FPmWyPILR8KVriSxhZUKUfzG6LJ7AnSIFmd9hMm21OXToLLFrKAHHfU3vA00593j0PWI'
+STRIPE_SECRET_KEY = 'sk_test_51HQc1dLBtka0EnE3AHOQ4ddzmxrri9BmO70r68csd5MbkfILAW3OFAlNK3cV3yCfGC8PMyakvoFgLlqjiytkguXO00oNXZSVBX'
+
+# Configure Stripe API version
+STRIPE_API_VERSION = '2023-10-16'

@@ -9,9 +9,17 @@ from . import views
 
 
 urlpatterns = [
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.login_user, name='login'),
-    path('logout/', views.logout, name='logout'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+
+    path('profile/', views.get_user_profile, name='profile'),
+    path('profile/update/', views.update_profile, name='update_profile'),
+    path('addresses/', views.get_user_addresses, name='get_addresses'),
+    path('addresses/add/', views.add_address, name='add_address'),
+    path('addresses/<int:address_id>/', views.manage_address, name='manage_address'),
+    path('addresses/<int:address_id>/set-default/', views.set_default_address, name='set_default_address'),
+    path('update-avatar/', views.update_avatar, name='update_avatar'),
 ]
 
 

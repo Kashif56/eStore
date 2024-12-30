@@ -93,7 +93,7 @@ const ProductDetail = () => {
     const selectedVariantIds = Object.values(selectedVariants).map(variant => variant.id);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/orders/add-to-cart/${productId}/`, {
+      const response = await fetch(`http://localhost:8000/api/orders/cart/add/${productId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

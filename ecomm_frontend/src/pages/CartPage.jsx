@@ -9,38 +9,32 @@ const CartPage = () => {
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const navigate = useNavigate();
 
-
-  // Update Order Quanrity
+  const fetchCart = async () => {
+    try {
+      const response = await axiosInstance.get('/api/orders/cart/');
+      if (response.data.status === 'success') {
+        setCartData(response.data.data);
+      } else {
+        setError(response.data.message || 'Error loading cart');
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        navigate('/login');
+      } else {
+        setError(err.response?.data?.message || 'Error loading cart');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
 
-    const fetchCart = async () => {
-      try {
-        const response = await axiosInstance.get('/api/orders/cart/');
-       
-        if (response.data.status === 'success') {
-          setCartData(response.data.data);
-        } else {
-          setError(response.data.message || 'Error loading cart');
-        }
-      } catch (err) {
-       
-        if (err.response?.status === 401) {
-          setError('Session expired. Please login again.');
-          navigate('/login');
-        } else {
-          setError(err.response?.data?.message || 'Error loading cart');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCart();
-  }, []);
+  }, [isAuthenticated]);
 
   if (loading) {
     return (
@@ -52,18 +46,19 @@ const CartPage = () => {
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-500">{error}</p>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-red-500 text-lg mb-4">{error}</div>
+        <button
+          onClick={() => navigate('/')}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          Go to Home
+        </button>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
-      <Cart cartData={cartData} />
-    </div>
-  );
+  return <Cart initialCartData={cartData} onCartUpdate={fetchCart} />;
 };
 
 export default CartPage;

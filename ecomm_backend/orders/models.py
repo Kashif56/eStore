@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from accounts.models import Address
 from products.models import Product, ProductVariant
 
 User = get_user_model()
@@ -65,6 +65,13 @@ class OrderItem(models.Model):
     allStatus = models.ManyToManyField(
         OrderItemStatus,
         related_name='all_order_items',
+        blank=True
+    )
+
+    shipping_address = models.ForeignKey(
+        Address,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True
     )
 

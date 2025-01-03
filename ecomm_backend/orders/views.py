@@ -3,13 +3,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import json
 from products.models import Product, ProductVariant
-from .models import Order, OrderItem, Payment, OrderItemStatus
-from .serializer import OrderSerializer, OrderItemSerializer
+from .models import Order, OrderItem, Payment, OrderItemStatus, ReturnRequest, ReturnRequestStatus
+from .serializer import OrderSerializer, OrderItemSerializer, PaymentSerializer
 from django.db.models import F, Sum
 from .utils import generate_order_id, generate_order_item_id
 from accounts.models import Address
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+import uuid
 
 # Initialize custom payment handler
 
@@ -194,126 +195,6 @@ def removeFromCart(request, orderItemId):
         }, status=500)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_user_orders(request):
-    try:
-        orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
-        orders_data = []
-        
-        for order in orders:
-            order_items = order.orderitem_set.all()
-            total_items = order_items.count()
-            total_amount = order_items.aggregate(
-                total=Sum(F('quantity') * F('price'))
-            )['total'] or 0
-            
-            items_data = []
-            for item in order_items:
-                items_data.append({
-                    'id': item.id,
-                    'product_name': item.product.name,
-                    'product_image': request.build_absolute_uri(item.product.image.url) if item.product.image else None,
-                    'quantity': item.quantity,
-                    'price': item.price,
-                    'subtotal': item.quantity * item.price
-                })
-            
-            orders_data.append({
-                'id': order.id,
-                'order_number': order.order_number,
-                'status': order.status,
-                'created_at': order.created_at,
-                'shipping_address': {
-                    'street_address': order.shipping_address.street_address,
-                    'apartment': order.shipping_address.apartment,
-                    'city': order.shipping_address.city,
-                    'state': order.shipping_address.state,
-                    'postal_code': order.shipping_address.postal_code,
-                } if order.shipping_address else None,
-                'payment_status': order.payment_status,
-                'payment_method': order.payment_method,
-                'total_items': total_items,
-                'total_amount': total_amount,
-                'items': items_data
-            })
-        
-        return Response({
-            'status': 'success',
-            'data': orders_data
-        })
-    except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_order_detail(request, order_id):
-    try:
-        order = Order.objects.get(id=order_id, user=request.user)
-        order_items = order.orderitem_set.all()
-        
-        items_data = []
-        for item in order_items:
-            items_data.append({
-                'id': item.id,
-                'product': {
-                    'id': item.product.id,
-                    'name': item.product.name,
-                    'description': item.product.description,
-                    'image': request.build_absolute_uri(item.product.image.url) if item.product.image else None,
-                    'price': item.product.price,
-                    'category': item.product.category.name if item.product.category else None,
-                },
-                'quantity': item.quantity,
-                'price': item.price,
-                'subtotal': item.quantity * item.price,
-                'status': item.status,
-                'created_at': item.created_at
-            })
-        
-        order_data = {
-            'id': order.id,
-            'order_number': order.order_number,
-            'status': order.status,
-            'created_at': order.created_at,
-            'shipping_address': {
-                'street_address': order.shipping_address.street_address,
-                'apartment': order.shipping_address.apartment,
-                'city': order.shipping_address.city,
-                'state': order.shipping_address.state,
-                'postal_code': order.shipping_address.postal_code,
-            } if order.shipping_address else None,
-            'billing_address': {
-                'street_address': order.billing_address.street_address,
-                'apartment': order.billing_address.apartment,
-                'city': order.billing_address.city,
-                'state': order.billing_address.state,
-                'postal_code': order.billing_address.postal_code,
-            } if order.billing_address else None,
-            'payment_status': order.payment_status,
-            'payment_method': order.payment_method,
-            'total_amount': sum(item['subtotal'] for item in items_data),
-            'items': items_data,
-            'notes': order.notes
-        }
-        
-        return Response({
-            'status': 'success',
-            'data': order_data
-        })
-    except Order.DoesNotExist:
-        return Response({
-            'status': 'error',
-            'message': 'Order not found'
-        }, status=404)
-    except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
 
 
 
@@ -359,7 +240,7 @@ def checkout(request):
         for item in cart_items:
             # Create initial status for each item
             status = OrderItemStatus.objects.create(
-                status='pending',
+                status='Pending',
                 orderItem=item
             )
 
@@ -441,14 +322,17 @@ def process_payment(request):
                 
 
                 # Create payment record
-                Payment.objects.create(
+                newPayment =Payment.objects.create(
                     user=request.user,
                     orderItem=orderItem,
-                    paymentMethod='credit_card',
-                    paymentId=f'DEMO-{order.orderId}',
+                    paymentMethod='Credit/Debit Card',
+                    paymentId=f'DEMO-{orderItem.orderItemId}',
                     amount=amount,
                     is_paid=True
                 )
+
+                orderItem.paymentDetail = newPayment
+                orderItem.save()
 
             return Response({
                 'status': 'success',
@@ -467,4 +351,125 @@ def process_payment(request):
         return Response({
             'status': 'error',
             'message': 'An error occurred while processing payment'
+        }, status=500)
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_orders(request):
+    try:
+        orderItems = OrderItem.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+        orderItemSerializer = OrderItemSerializer(orderItems, many=True)
+
+      
+        return Response({
+            'status': 'success',
+            'data': orderItemSerializer.data
+        })
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_order_detail(request, orderItem_id):
+    try:
+        print(f"Fetching order item: {orderItem_id}")
+        order_item = OrderItem.objects.get(orderItemId=orderItem_id)
+        paymentObj = Payment.objects.get(orderItem=order_item)
+        paymentObjSerializer = PaymentSerializer(paymentObj)
+        serializer = OrderItemSerializer(order_item)
+
+      
+        return Response({
+            'status': 'success',
+            'data': serializer.data,
+            'payment': paymentObjSerializer.data
+        })
+    except OrderItem.DoesNotExist:
+        return Response({
+            'status': 'error',
+            'message': 'Order item not found'
+        }, status=404)
+    except Exception as e:
+        print(f"Error in get_order_detail: {str(e)}")
+        return Response({
+            'status': 'error',
+            'message': 'An unexpected error occurred.',
+            'details': str(e)
+        }, status=500)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def request_return(request, orderitem_id):
+    try:
+        order_item = OrderItem.objects.get(orderItemId=orderitem_id, user=request.user)
+        
+        # Check if the order item is delivered
+        if not order_item.currentStatus or order_item.currentStatus.status != 'Delivered':
+            return Response({
+                'status': 'error',
+                'message': 'Return can only be requested for delivered items'
+            }, status=400)
+            
+        # Check if return request already exists
+        if ReturnRequest.objects.filter(orderItem=order_item).exists():
+            return Response({
+                'status': 'error',
+                'message': 'Return request already exists for this order item'
+            }, status=400)
+            
+        # Generate unique return request ID
+        return_request_id = f"RET-{uuid.uuid4().hex[:8].upper()}"
+        
+        # Create return request
+        return_request = ReturnRequest.objects.create(
+            returnRequestId=return_request_id,
+            orderItem=order_item,
+            user=request.user,
+            reason=request.data.get('reason'),
+            description=request.data.get('description')
+        )
+        
+        # Create initial return request status
+        return_request_status = ReturnRequestStatus.objects.create(
+            returnRequest=return_request,
+            status='Pending'
+        )
+
+        # Update order item status to Return Requested
+        orderItemStatus = OrderItemStatus.objects.create(
+            orderItem=order_item,
+            status='Return Requested',
+        )
+
+        order_item.currentStatus = orderItemStatus
+        order_item.allStatus.add(orderItemStatus)
+        order_item.save()
+
+        return_request.currentStatus = return_request_status
+        return_request.allStatus.add(return_request_status)
+        return_request.save()
+
+        return Response({
+            'status': 'success',
+            'message': 'Return request created successfully',  
+        })
+        
+    except OrderItem.DoesNotExist:
+        return Response({
+            'status': 'error',
+            'message': 'Order item not found'
+        }, status=404)
+    except Exception as e:
+        print(f"Error in request_return: {str(e)}")  # Add debug logging
+        return Response({
+            'status': 'error',
+            'message': str(e)
         }, status=500)

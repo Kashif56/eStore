@@ -11,5 +11,6 @@ urlpatterns = [
 
     path('get-all-reviews/<productId>/', views.getAllReviews, name='getAllReviews'),
     path('add-review/<productId>/', views.addProductReview, name='addProductReview'),
+    path('variants/', views.get_variants, name='get-variants'),
  
 ]

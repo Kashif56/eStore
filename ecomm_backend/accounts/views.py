@@ -3,8 +3,13 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate, login, logout
+
+from orders.models import OrderItem
 from .models import CustomUser, Address
 from .serializers import CustomUserSerializer, AddressSerializer
+
+# Import Avg
+from django.db.models import Avg
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -85,7 +90,11 @@ def get_user_profile(request):
             'date_joined': user.date_joined,
             'avatar': request.build_absolute_uri(user.avatar.url) if user.avatar else None,
             'last_login': user.last_login,
-            'updated_at': user.updated_at
+            'updated_at': user.updated_at,
+            'ordersCount': OrderItem.objects.filter(user=request.user, is_ordered=True).count(),
+
+            'reviewsCount': user.reviews.count(),
+            'avgRating': user.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating'],
         }
         return Response({
             'status': 'success',

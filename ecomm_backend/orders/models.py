@@ -10,6 +10,7 @@ STATUS_CHOICES = (
     ('Shipped', 'Shipped'),
     ('Delivered', 'Delivered'),
     ('Cancelled', 'Cancelled'),
+    ('Return Requested', 'Return Requested'),
     ('Returned', 'Returned'),
     ('Refunded', 'Refunded'),
 )
@@ -28,8 +29,8 @@ class OrderItemStatus(models.Model):
         related_name='statuses'  # Changed for clarity
     )
 
-    shipped_from = models.CharField(max_length=100)
-    shipped_to = models.CharField(max_length=100)
+    shipped_from = models.CharField(max_length=100, null=True, blank=True)
+    shipped_to = models.CharField(max_length=100, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -73,6 +74,15 @@ class OrderItem(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True
+    )
+
+    paymentDetail = models.ForeignKey(
+        'Payment',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='orderItemPayment'
+
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -139,3 +149,75 @@ class Payment(models.Model):
 
     def __str__(self):
         return str(self.paymentId)
+
+
+RETURN_STATUS_CHOICES = (
+    ('Pending', 'Pending'),
+    ('Approved', 'Approved'),
+    ('Rejected', 'Rejected'),
+    ('Cancelled', 'Cancelled'),
+)
+
+class ReturnRequestStatus(models.Model):
+    status = models.CharField(max_length=100, choices=RETURN_STATUS_CHOICES)
+    returnRequest = models.ForeignKey(
+        'ReturnRequest',
+        on_delete=models.CASCADE,
+        related_name='return_request_statuses'  # Changed for clarity
+    )
+
+    reason = models.CharField(max_length=255, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.status
+
+class ReturnRequest(models.Model):
+    returnRequestId = models.CharField(max_length=100, unique=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    orderItem = models.ForeignKey(
+        'OrderItem',
+        on_delete=models.CASCADE,
+    )
+    description = models.TextField()
+    reason = models.CharField(max_length=255, null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
+
+    currentStatus = models.ForeignKey(
+        ReturnRequestStatus,
+        on_delete=models.CASCADE,
+        related_name='return_request_status',
+        null=True, blank=True
+    )
+
+    allStatus = models.ManyToManyField(
+        ReturnRequestStatus,
+        related_name='all_return_requests',
+        blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.returnRequestId)
+
+
+class Refund(models.Model):
+    refundId = models.CharField(max_length=100, unique=True)
+    returnRequest = models.ForeignKey(
+        'ReturnRequest',
+        on_delete=models.CASCADE,
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.refundId)

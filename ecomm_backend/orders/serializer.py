@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderItem, OrderItemStatus, Payment
+from .models import Order, OrderItem, OrderItemStatus, Payment, ReturnRequest, ReturnRequestStatus, Refund
 from products.models import Product, ProductVariant
 
 
@@ -24,11 +24,39 @@ class ProductSerializer(serializers.ModelSerializer):
         depth = 1  # This will serialize the related images automatically
 
 
+class ReturnRequestStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReturnRequestStatus
+        fields = '__all__'
+
+
+class RefundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Refund
+        fields = '__all__'
+
+
+class ReturnRequestSerializer(serializers.ModelSerializer):
+    currentStatus = ReturnRequestStatusSerializer(read_only=True)
+    allStatus = ReturnRequestStatusSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ReturnRequest
+        fields = '__all__'
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
+
+
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     productVariant = ProductVariantSerializer(many=True, read_only=True)
     currentStatus = OrderItemStatusSerializer(read_only=True)
     allStatus = OrderItemStatusSerializer(many=True, read_only=True)
+    paymentDetail = PaymentSerializer(read_only=True)
     variantDetails = serializers.SerializerMethodField()
 
     class Meta:
@@ -62,10 +90,3 @@ class OrderSerializer(serializers.ModelSerializer):
         if obj:
             return obj.getOrderTotal()
         return 0
-
-class PaymentSerializer(serializers.ModelSerializer):
-    orderItem = OrderItemSerializer(read_only=True)
-
-    class Meta:
-        model = Payment
-        fields = '__all__'

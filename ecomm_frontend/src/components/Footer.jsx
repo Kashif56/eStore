@@ -40,6 +40,11 @@ const Footer = () => {
                   Special Deals
                 </Link>
               </li>
+              <li>
+                <Link to="/seller/register" className="text-gray-400 hover:text-white text-sm">
+                  Become a Seller
+                </Link>
+              </li>
             </ul>
           </div>
 

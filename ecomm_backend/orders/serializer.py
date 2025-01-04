@@ -4,6 +4,8 @@ from products.models import Product, ProductVariant
 
 
 
+
+
 class OrderItemStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItemStatus
@@ -36,13 +38,7 @@ class RefundSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ReturnRequestSerializer(serializers.ModelSerializer):
-    currentStatus = ReturnRequestStatusSerializer(read_only=True)
-    allStatus = ReturnRequestStatusSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = ReturnRequest
-        fields = '__all__'
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -58,6 +54,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     allStatus = OrderItemStatusSerializer(many=True, read_only=True)
     paymentDetail = PaymentSerializer(read_only=True)
     variantDetails = serializers.SerializerMethodField()
+
+    orderItemTotal = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
@@ -76,6 +74,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
             for variant in variants
         ]
 
+    def get_orderItemTotal(self, obj):
+        return obj.getOrderItemTotal()
 
 class OrderSerializer(serializers.ModelSerializer):
     orderItems = OrderItemSerializer(many=True, read_only=True)
@@ -90,3 +90,13 @@ class OrderSerializer(serializers.ModelSerializer):
         if obj:
             return obj.getOrderTotal()
         return 0
+
+
+class ReturnRequestSerializer(serializers.ModelSerializer):
+    currentStatus = ReturnRequestStatusSerializer(read_only=True)
+    allStatus = ReturnRequestStatusSerializer(many=True, read_only=True)
+    orderItem = OrderItemSerializer(read_only=True)
+
+    class Meta:
+        model = ReturnRequest
+        fields = '__all__'

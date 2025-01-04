@@ -24,7 +24,7 @@ import {
   formatNumber,
   formatTrend,
   formatDate,
-  api
+  fetchTopProducts
 } from '../../services/dashboardService';
 import { useNavigate } from 'react-router-dom';
 
@@ -205,36 +205,68 @@ const Dashboard = () => {
     }
   };
 
-  const fetchGraphStats = async () => {
+  const fetchGraphData = async (period) => {
     try {
       setGraphLoading(true);
-      const data = await fetchSalesGraphData(graphPeriod);
-      setGraphData(data);
+      const response = await fetchSalesGraphData(period || graphPeriod);
+      if (response?.status === 'success' && Array.isArray(response.data)) {
+        setGraphData(response.data);
+      } else {
+        setGraphData([]);
+      }
       setError(null);
     } catch (err) {
-      setError(err.message);
-      console.error('Error fetching graph data:', err);
+      if (err.response?.status === 404) {
+        navigate('/seller/register');
+      } else {
+        setError(`Error fetching graph data: ${err.message}`);
+        console.error('Error fetching graph data:', err);
+        setGraphData([]);
+      }
     } finally {
       setGraphLoading(false);
     }
   };
 
-  const fetchTopProducts = async () => {
+  const fetchTopProductsData = async (period) => {
     try {
       setTopProductsLoading(true);
-      const response = await api.get('/dashboard/top-products/');
-      setTopProducts(response.data);
+      const response = await fetchTopProducts(period || graphPeriod);
+      if (response?.status === 'success' && Array.isArray(response.data)) {
+        setTopProducts(response.data);
+      } else {
+        setTopProducts([]);
+      }
+      setError(null);
     } catch (err) {
-      console.error('Error fetching top products:', err);
+      if (err.response?.status === 404) {
+        navigate('/seller/register');
+      } else {
+        setError(`Error fetching top products: ${err.message}`);
+        console.error('Error fetching top products:', err);
+        setTopProducts([]);
+      }
     } finally {
       setTopProductsLoading(false);
     }
   };
 
   useEffect(() => {
-    Object.keys(cardPeriods).forEach((card) => fetchCardStats(card));
-    fetchGraphStats();
-    fetchTopProducts();
+    const fetchAllData = async () => {
+      try {
+        await Promise.all([
+          fetchCardStats('sales'),
+          fetchCardStats('orders'),
+          fetchCardStats('average'),
+          fetchGraphData(),
+          fetchTopProductsData()
+        ]);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+
+    fetchAllData();
   }, []);
 
   const handleCardPeriodChange = (card, period) => {
@@ -244,7 +276,7 @@ const Dashboard = () => {
 
   const handleGraphPeriodChange = (period) => {
     setGraphPeriod(period);
-    fetchGraphStats();
+    fetchGraphData();
   };
 
   if (error) return (
@@ -307,7 +339,7 @@ const Dashboard = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={fetchGraphStats}
+                  onClick={fetchGraphData}
                   className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
                   title="Refresh data"
                 >
@@ -329,66 +361,77 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart 
-                  data={graphData}
-                  onMouseMove={(e) => {
-                    if (e.activeTooltipIndex !== undefined) {
-                      setSelectedDataPoint(graphData[e.activeTooltipIndex]);
-                    }
-                  }}
-                  onMouseLeave={() => setSelectedDataPoint(null)}
-                >
-                  <defs>
-                    <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#9CA3AF"
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(date) => formatDate(date, graphPeriod)}
-                  />
-                  <YAxis 
-                    stroke="#9CA3AF"
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => formatCurrency(value)}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: '#F9FAFB',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            {!Array.isArray(graphData) || graphData.length === 0 ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">No Sales Data Available</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">
+                    Start selling to see your sales graph here
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart 
+                    data={graphData}
+                    onMouseMove={(e) => {
+                      if (e.activeTooltipIndex !== undefined) {
+                        setSelectedDataPoint(graphData[e.activeTooltipIndex]);
+                      }
                     }}
-                    formatter={(value) => [formatCurrency(value), 'Sales']}
-                    labelFormatter={(date) => formatDate(date, graphPeriod)}
-                    animationDuration={200}
-                  />
-                  {selectedDataPoint && (
-                    <ReferenceLine
-                      x={selectedDataPoint.date}
-                      stroke="#3B82F6"
-                      strokeDasharray="3 3"
+                    onMouseLeave={() => setSelectedDataPoint(null)}
+                  >
+                    <defs>
+                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#9CA3AF"
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(date) => formatDate(date, graphPeriod)}
                     />
-                  )}
-                  <Area 
-                    type="monotone" 
-                    dataKey="sales" 
-                    stroke="#3B82F6" 
-                    fill="url(#salesGradient)"
-                    strokeWidth={2}
-                    animationDuration={1000}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+                    <YAxis 
+                      stroke="#9CA3AF"
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => formatCurrency(value)}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#F9FAFB',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                      formatter={(value) => [formatCurrency(value), 'Sales']}
+                      labelFormatter={(date) => formatDate(date, graphPeriod)}
+                      animationDuration={200}
+                    />
+                    {selectedDataPoint && (
+                      <ReferenceLine
+                        x={selectedDataPoint.date}
+                        stroke="#3B82F6"
+                        strokeDasharray="3 3"
+                      />
+                    )}
+                    <Area 
+                      type="monotone" 
+                      dataKey="sales" 
+                      stroke="#3B82F6" 
+                      fill="url(#salesGradient)"
+                      strokeWidth={2}
+                      animationDuration={1000}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
         )}
 
@@ -397,7 +440,7 @@ const Dashboard = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Top Sold Products</h2>
             <button
-              onClick={fetchTopProducts}
+              onClick={fetchTopProductsData}
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
               title="Refresh data"
             >
@@ -418,17 +461,30 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
+          ) : !Array.isArray(topProducts) || topProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">No Products Available</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm">
+                Add products to your store to see them listed here
+              </p>
+              <button
+                onClick={() => navigate('/seller/products/add')}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Add Your First Product
+              </button>
+            </div>
           ) : (
             <div className="space-y-4">
               {topProducts.map((product, index) => (
                 <div 
-                  key={product.productId} 
+                  key={index}
                   className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
-                  onClick={() => navigate(`/seller/products/${product.productId}`)}
+                  onClick={() => navigate(`/seller/products/${product.product_id}`)}
                 >
                   <img 
-                    src={`http://localhost:8000/${product.images[0].image}` || 'placeholder-image-url'} 
-                    alt={product.name}
+                    src={product.product_image || 'https://via.placeholder.com/48'} 
+                    alt={product.product_name || 'Product'}
                     className="w-12 h-12 object-cover rounded-lg"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -436,11 +492,15 @@ const Dashboard = () => {
                     }}
                   />
                   <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">{product.name}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{product.sold} units sold</p>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                      {product.product_name || 'Untitled Product'}
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {product.total_orders || 0} units sold
+                    </p>
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    Rs. {product.discount_price ? product.discount_price * product.sold : product.base_price * product.sold}
+                    {formatCurrency(product.total_sales || 0)}
                   </p>
                 </div>
               ))}

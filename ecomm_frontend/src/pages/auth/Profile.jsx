@@ -77,6 +77,65 @@ const Profile = () => {
     }
   };
 
+  const handleUpdateProfile = async (formData) => {
+    try {
+      const response = await axiosInstance.put('/api/auth/profile/update/', formData);
+      if (response.data.status === 'success') {
+        setUserData(response.data.data);
+        setToast({
+          type: 'success',
+          message: 'Profile updated successfully'
+        });
+        setIsProfileEditModalOpen(false);
+      } else {
+        setToast({
+          type: 'error',
+          message: response.data.message || 'Failed to update profile'
+        });
+      }
+    } catch (error) {
+      setToast({
+        type: 'error',
+        message: error.response?.data?.message || 'An error occurred while updating profile'
+      });
+    }
+  };
+
+  const handleUpdateAvatar = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await axiosInstance.put('/api/auth/profile/update-avatar/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.status === 'success') {
+        setUserData(prev => ({
+          ...prev,
+          avatar: response.data.data.avatar
+        }));
+        setToast({
+          type: 'success',
+          message: 'Avatar updated successfully'
+        });
+        setIsAvatarModalOpen(false);
+      } else {
+        setToast({
+          type: 'error',
+          message: response.data.message || 'Failed to update avatar'
+        });
+      }
+    } catch (error) {
+      setToast({
+        type: 'error',
+        message: error.response?.data?.message || 'An error occurred while updating avatar'
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -250,8 +309,8 @@ const Profile = () => {
         <ProfileEditModal
           isOpen={isProfileEditModalOpen}
           onClose={() => setIsProfileEditModalOpen(false)}
+          onSubmit={handleUpdateProfile}
           userData={userData}
-          onUpdate={handleUpdateProfile}
         />
       )}
 
@@ -260,7 +319,8 @@ const Profile = () => {
         <AvatarModal
           isOpen={isAvatarModalOpen}
           onClose={() => setIsAvatarModalOpen(false)}
-          onUpdate={handleUpdateAvatar}
+          onSubmit={handleUpdateAvatar}
+          currentAvatar={userData?.avatar}
         />
       )}
     </>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../services/dashboardService';
+import { fetchCategories, fetchSubcategories, fetchVariants, addProduct, uploadProductImage } from '../../services/productService';
 import { MdCloudUpload, MdDelete, MdAdd } from 'react-icons/md';
 
 const AddProduct = () => {
@@ -12,6 +12,7 @@ const AddProduct = () => {
   const [previewImages, setPreviewImages] = useState([]);
   const [variants, setVariants] = useState([]);
   const [availableVariants, setAvailableVariants] = useState([]);
+  const [error, setError] = useState(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -25,59 +26,76 @@ const AddProduct = () => {
     variants: [{ name: '', options: [''], price: '', stock: '' }]
   });
 
+  const fetchCategoriesData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchCategories();
+      if (Array.isArray(response)) {
+        setCategories(response);
+        setError(null);
+      } else {
+        setError('No categories available');
+        setCategories([]);
+      }
+    } catch (err) {
+      setError('Error fetching categories: ' + err.message);
+      console.error('Error fetching categories:', err);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSubcategoriesData = async (categoryId) => {
+    try {
+      setLoading(true);
+      const response = await fetchSubcategories(categoryId);
+      if (response?.status === 'success' && Array.isArray(response.subcategories)) {
+        setSubcategories(response.subcategories);
+        setError(null);
+      } else {
+        setError('No subcategories available');
+        setSubcategories([]);
+      }
+    } catch (err) {
+      setError('Error fetching subcategories: ' + err.message);
+      console.error('Error fetching subcategories:', err);
+      setSubcategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVariantsData = async (categoryId) => {
+    try {
+      setLoading(true);
+      const response = await fetchVariants(categoryId);
+      if (Array.isArray(response?.variants)) {
+        setAvailableVariants(response.variants);
+      } else {
+        setAvailableVariants([]);
+      }
+    } catch (err) {
+      console.error('Error fetching variants:', err);
+      setAvailableVariants([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchCategories();
+    fetchCategoriesData();
   }, []);
 
   useEffect(() => {
     if (formData.category) {
-      fetchSubcategories(formData.category);
+      fetchSubcategoriesData(formData.category);
+      fetchVariantsData(formData.category);
     } else {
       setSubcategories([]);
+      setAvailableVariants([]);
     }
   }, [formData.category]);
-
-  useEffect(() => {
-    const fetchVariants = async () => {
-      if (!formData.category) {
-        setAvailableVariants([]);
-        return;
-      }
-
-      try {
-        const response = await api.get(`/variants/?category=${formData.category}`);
-        if (response.data.status === 'success') {
-          setAvailableVariants(response.data.variants);
-        } else {
-          console.error('Failed to fetch variants:', response.data);
-          setAvailableVariants([]);
-        }
-      } catch (error) {
-        console.error('Error fetching variants:', error.response?.data || error.message);
-        setAvailableVariants([]);
-      }
-    };
-
-    fetchVariants();
-  }, [formData.category]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/categories/');
-      setCategories(response.data);
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-    }
-  };
-
-  const fetchSubcategories = async (categoryId) => {
-    try {
-      const response = await api.get(`/categories/${categoryId}/subcategories/`);
-      setSubcategories(response.data);
-    } catch (err) {
-      console.error('Error fetching subcategories:', err);
-    }
-  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -204,13 +222,9 @@ const AddProduct = () => {
         console.log(pair[0], pair[1]);
       }
 
-      const response = await api.post('/products/add/', productFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await addProduct(productFormData);
 
-      console.log('API Response:', response.data);
+      console.log('API Response:', response);
       navigate('/seller/products');
     } catch (err) {
       console.error('Error details:', err.response?.data || err.message);
@@ -229,329 +243,330 @@ const AddProduct = () => {
       subcategory: '',  // Reset subcategory
       variants: []      // Reset variants
     });
+
+    if (categoryId) {
+      await fetchSubcategoriesData(categoryId);
+      await fetchVariantsData(categoryId);
+    } else {
+      setSubcategories([]);
+      setAvailableVariants([]);
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Add New Product</h1>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Category *
-              </label>
-              <select
-                value={formData.category}
-                onChange={handleCategoryChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {formData.category && (
+    <div className="min-h-screen bg-gray-100 p-6 ml-64">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Add New Product</h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Subcategory *
+                  Product Name *
                 </label>
-                <select
-                  required
-                  value={formData.subcategory}
-                  onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select Subcategory</option>
-                  {subcategories.map(subcategory => (
-                    <option key={subcategory.id} value={subcategory.id}>
-                      {subcategory.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Base Price *
-              </label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={formData.base_price}
-                onChange={(e) => setFormData({ ...formData, base_price: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Discount Price
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.discount_price}
-                onChange={(e) => setFormData({ ...formData, discount_price: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Stock *
-              </label>
-              <input
-                type="number"
-                required
-                min="0"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Description *</h2>
-          <textarea
-            required
-            rows={4}
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </div>
-
-        {/* Product Attributes */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white">Product Attributes</h2>
-            <button
-              type="button"
-              onClick={addAttribute}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
-            >
-              <MdAdd size={20} />
-              <span>Add Attribute</span>
-            </button>
-          </div>
-          
-          {formData.attributes.map((attribute, index) => (
-            <div key={index} className="flex space-x-4 mb-4">
-              <input
-                type="text"
-                placeholder="Attribute Name"
-                value={attribute.name}
-                onChange={(e) => handleAttributeChange(index, 'name', e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-              <input
-                type="text"
-                placeholder="Attribute Value"
-                value={attribute.value}
-                onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-              <button
-                type="button"
-                onClick={() => removeAttribute(index)}
-                className="p-2 text-red-500 hover:text-red-700"
-              >
-                <MdDelete size={20} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Product Variants */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Product Variants</h3>
-            {formData.category && (
-              <button
-                type="button"
-                onClick={addVariant}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                <MdAdd size={20} />
-                <span>Add Variant</span>
-              </button>
-            )}
-          </div>
-
-          {!formData.category ? (
-            <div className="text-gray-500 dark:text-gray-400 text-center py-4">
-              Please select a category to view available variants
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Permanent Variant Form */}
-              <div className="flex items-center space-x-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border-2 border-blue-200 dark:border-blue-800">
-                <select
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select Variant Type</option>
-                  {availableVariants.map((v) => (
-                    <option key={v.id} value={v.name}>
-                      {v.name}
-                    </option>
-                  ))}
-                </select>
-
                 <input
                   type="text"
-                  placeholder="Option Value (e.g., Small, Red)"
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                />
-
-                <input
-                  type="number"
-                  placeholder="Price ±"
-                  className="w-32 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                />
-
-                <input
-                  type="number"
-                  placeholder="Stock"
-                  className="w-32 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
+              
+              <div className="space-y-4">
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Category *
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleCategoryChange}
+                  className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                {error && error.includes('categories') && (
+                  <p className="mt-2 text-sm text-red-600">{error}</p>
+                )}
+              </div>
 
-              {/* Added Variants List */}
-              {formData.variants.map((variant, variantIndex) => (
-                <div key={variantIndex} className="flex items-center space-x-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+              {formData.category && (
+                <div>
+                  <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Subcategory
+                  </label>
                   <select
-                    value={variant.name}
-                    onChange={(e) => handleVariantChange(variantIndex, 'name', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    id="subcategory"
+                    name="subcategory"
+                    value={formData.subcategory}
+                    onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="">Select Variant Type</option>
-                    {availableVariants.map((v) => (
-                      <option key={v.id} value={v.name}>
-                        {v.name}
+                    <option value="">Select a subcategory</option>
+                    {subcategories.map((subcategory) => (
+                      <option key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
                       </option>
                     ))}
                   </select>
-
-                  <input
-                    type="text"
-                    placeholder="Option Value (e.g., Small, Red)"
-                    value={variant.options[0] || ''}
-                    onChange={(e) => handleVariantChange(variantIndex, 'options', [e.target.value])}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Price ±"
-                    value={variant.price || ''}
-                    onChange={(e) => handleVariantChange(variantIndex, 'price', e.target.value)}
-                    className="w-32 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Stock"
-                    value={variant.stock || ''}
-                    onChange={(e) => handleVariantChange(variantIndex, 'stock', e.target.value)}
-                    className="w-32 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => removeVariant(variantIndex)}
-                    className="p-2 text-red-500 hover:text-red-700"
-                  >
-                    <MdDelete size={20} />
-                  </button>
+                  {error && error.includes('subcategories') && (
+                    <p className="mt-2 text-sm text-red-600">{error}</p>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              )}
 
-        {/* Images */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Product Images *</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {previewImages.map((preview, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={preview}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-lg"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Base Price *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={formData.base_price}
+                  onChange={(e) => setFormData({ ...formData, base_price: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Discount Price
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.discount_price}
+                  onChange={(e) => setFormData({ ...formData, discount_price: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Stock *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Description *</h2>
+            <textarea
+              required
+              rows={4}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Product Attributes */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Product Attributes</h2>
+              <button
+                type="button"
+                onClick={addAttribute}
+                className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+              >
+                <MdAdd size={20} />
+                <span>Add Attribute</span>
+              </button>
+            </div>
+            
+            {formData.attributes.map((attribute, index) => (
+              <div key={index} className="flex space-x-4 mb-4">
+                <input
+                  type="text"
+                  placeholder="Attribute Name"
+                  value={attribute.name}
+                  onChange={(e) => handleAttributeChange(index, 'name', e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+                <input
+                  type="text"
+                  placeholder="Attribute Value"
+                  value={attribute.value}
+                  onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
                 <button
                   type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                  onClick={() => removeAttribute(index)}
+                  className="p-2 text-red-500 hover:text-red-700"
                 >
-                  <MdDelete size={16} />
+                  <MdDelete size={20} />
                 </button>
               </div>
             ))}
-            {previewImages.length < 4 && (
-              <label className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200">
-                <MdCloudUpload size={24} className="text-gray-400" />
-                <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">Upload Image</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                  multiple
-                />
-              </label>
-            )}
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/seller/products')}
-            className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
-          >
-            {loading ? 'Adding Product...' : 'Add Product'}
-          </button>
-        </div>
-      </form>
+          {/* Product Variants */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Product Variants</h2>
+            <div className="space-y-4">
+              {formData.variants.map((variant, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center gap-4">
+                    <select
+                      value={variant.name}
+                      onChange={(e) => {
+                        const newVariants = [...formData.variants];
+                        newVariants[index].name = e.target.value;
+                        setFormData({ ...formData, variants: newVariants });
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    >
+                      <option value="">Select Variant Type</option>
+                      {availableVariants.map(v => (
+                        <option key={v.id} value={v.name}>{v.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newVariants = formData.variants.filter((_, i) => i !== index);
+                        setFormData({ ...formData, variants: newVariants });
+                      }}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    >
+                      <MdDelete size={20} />
+                    </button>
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    {variant.options.map((option, optionIndex) => (
+                      <div key={optionIndex} className="flex items-center gap-4">
+                        <input
+                          type="text"
+                          value={option}
+                          onChange={(e) => {
+                            const newVariants = [...formData.variants];
+                            newVariants[index].options[optionIndex] = e.target.value;
+                            setFormData({ ...formData, variants: newVariants });
+                          }}
+                          placeholder="Option Value"
+                          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newVariants = [...formData.variants];
+                            newVariants[index].options = variant.options.filter((_, i) => i !== optionIndex);
+                            setFormData({ ...formData, variants: newVariants });
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                        >
+                          <MdDelete size={20} />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newVariants = [...formData.variants];
+                        newVariants[index].options.push('');
+                        setFormData({ ...formData, variants: newVariants });
+                      }}
+                      className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
+                    >
+                      Add Option
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    variants: [...formData.variants, { name: '', options: [''] }]
+                  });
+                }}
+                className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2"
+              >
+                <MdCloudUpload size={20} />
+                Add Variant
+              </button>
+            </div>
+          </div>
+
+          {/* Images */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Product Images *</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {previewImages.map((preview, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                  >
+                    <MdDelete size={16} />
+                  </button>
+                </div>
+              ))}
+              {previewImages.length < 4 && (
+                <label className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200">
+                  <MdCloudUpload size={24} className="text-gray-400" />
+                  <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">Upload Image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                    multiple
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={() => navigate('/seller/products')}
+              className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+            >
+              {loading ? 'Adding Product...' : 'Add Product'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -266,6 +266,8 @@ def checkout(request):
                     paymentMethod='cod',
                   
                 )
+                item.paymentDetail = payment
+                item.save()
 
         order.is_ordered = True
         order.save()

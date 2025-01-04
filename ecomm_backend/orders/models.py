@@ -7,10 +7,14 @@ User = get_user_model()
 
 STATUS_CHOICES = (
     ('Pending', 'Pending'),
+    ('Processing', 'Processing'),
+    ('Processed', 'Processed'),
     ('Shipped', 'Shipped'),
     ('Delivered', 'Delivered'),
     ('Cancelled', 'Cancelled'),
     ('Return Requested', 'Return Requested'),
+    ('Return Approved', 'Return Approved'),
+    ('Return Rejected', 'Return Rejected'),
     ('Returned', 'Returned'),
     ('Refunded', 'Refunded'),
 )
@@ -85,6 +89,19 @@ class OrderItem(models.Model):
 
     )
 
+    refund = models.ForeignKey(
+        'Refund',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='orderItemRefund'
+    )
+
+    courier = models.CharField(max_length=100, null=True, blank=True)
+    trackingId = models.CharField(max_length=100, null=True, blank=True)
+
+
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -154,6 +171,7 @@ class Payment(models.Model):
 RETURN_STATUS_CHOICES = (
     ('Pending', 'Pending'),
     ('Approved', 'Approved'),
+    ('Returned', 'Returned'),
     ('Rejected', 'Rejected'),
     ('Cancelled', 'Cancelled'),
 )
@@ -214,6 +232,8 @@ class Refund(models.Model):
         'ReturnRequest',
         on_delete=models.CASCADE,
     )
+    paymentMethod = models.CharField(max_length=100)
+    transactionId = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     created_at = models.DateTimeField(auto_now_add=True)

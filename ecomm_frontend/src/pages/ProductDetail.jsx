@@ -6,6 +6,7 @@ import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import ReviewSection from '../components/ReviewSection';
 import Toast from '../components/Toast';
 import { useSelector, useDispatch } from 'react-redux';
+import axiosInstance from '../utils/axiosInstance';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -26,23 +27,21 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/products/product-detail/${productId}/`);
+        const response = await axiosInstance.get(`/api/products/product-detail/${productId}/`);
         
-        if (response.ok) {
-          const data = await response.json();
-          setProduct(data);
+        if (response.data) {
+          setProduct(response.data);
         } else {
-          const errorData = await response.json();
           setToast({
             type: 'error',
-            message: errorData.message || 'Failed to load product details'
+            message: 'Failed to load product details'
           });
         }
       } catch (error) {
         console.error('Error fetching product:', error);
         setToast({
           type: 'error',
-          message: 'Error loading product details'
+          message: error.response?.data?.error || 'Error loading product details'
         });
       } finally {
         setLoading(false);
@@ -93,24 +92,15 @@ const ProductDetail = () => {
     const selectedVariantIds = Object.values(selectedVariants).map(variant => variant.id);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/orders/cart/add/${productId}/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          qty: parseInt(quantity),
-          variant_ids: selectedVariantIds
-        })
+      const response = await axiosInstance.post(`/api/orders/add-to-cart/${productId}/`, {
+        qty: parseInt(quantity),
+        variant_ids: selectedVariantIds
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
+      if (response.data.status === 'success') {
         setToast({
           type: 'success',
-          message: data.message || 'Product added to cart successfully!'
+          message: response.data.message || 'Product added to cart successfully!'
         });
 
         // Navigate to cart after a short delay
@@ -119,7 +109,7 @@ const ProductDetail = () => {
         }, 1500);
 
       } else {
-        if (response.status === 401) {
+        if (response.data.status === 'error' && response.data.code === 401) {
           setToast({
             type: 'error',
             message: 'Please login to add items to cart'
@@ -128,7 +118,7 @@ const ProductDetail = () => {
         } else {
           setToast({
             type: 'error',
-            message: data.message || 'Failed to add product to cart'
+            message: response.data.message || 'Failed to add product to cart'
           });
         }
       }

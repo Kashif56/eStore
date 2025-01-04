@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate, login, logout
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from orders.models import OrderItem
 from .models import CustomUser, Address
@@ -13,24 +14,64 @@ from django.db.models import Avg
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def register(request):
+def signup(request):
     try:
-        serializer = CustomUserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                return Response({
-                    'status': 'success',
-                    'data': serializer.data
-                }, status=status.HTTP_201_CREATED)
-        return Response({
-            'status': 'error',
-            'message': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+        # Extract data from request
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        # Validate required fields
+        if not username or not password:
+            return Response({
+                'status': 'error',
+                'message': 'Username and password are required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if username already exists
+        if CustomUser.objects.filter(username=username).exists():
+            return Response({
+                'status': 'error',
+                'message': 'Username already exists'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create user
+        user = CustomUser.objects.create_user(
+            username=username,
+            password=password
+        )
+
+        # Automatically authenticate the user
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            
+            # Generate authentication tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            # Serialize user data for response
+            serializer = CustomUserSerializer(user)
+
+            return Response({
+                'status': 'success',
+                'message': 'Account created successfully',
+                'data': serializer.data,
+                'tokens': {
+                    'access': access_token,
+                    'refresh': str(refresh)
+                }
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                'status': 'error',
+                'message': 'Failed to authenticate user'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     except Exception as e:
+        print(f"Error in signup: {str(e)}")
         return Response({
             'status': 'error',
-            'message': str(e)
+            'message': 'Failed to create account'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])

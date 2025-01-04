@@ -6,6 +6,7 @@ from django.db.models import Count, Q
 
 from .models import Product, ProductAttributes, Variant, ProductVariant, Category, SubCategory, Images, ProductReview
 from .serializer import ProductSerializer, ProductAttributesSerializer, VariantSerializer, ProductVariantSerializer, CategorySerializer, SubCategorySerializer, ImagesSerializer, ProductReviewSerializer
+from orders.models import OrderItem
 
 
 @api_view(['GET'])
@@ -154,6 +155,8 @@ def addProductReview(request, productId):
         rating = request.data.get('rating')
         comment = request.data.get('comment')
 
+      
+
         review = ProductReview.objects.create(product=productObj, rating=rating, comment=comment, user=request.user)
 
         serializer = ProductReviewSerializer(review)
@@ -170,7 +173,8 @@ def addProductReview(request, productId):
 def getAllReviews(request, productId):
     try:
         obj = Product.objects.get(productId=productId)
-        serializer = ProductSerializer(obj)
+        reviews = ProductReview.objects.filter(product=obj)
+        serializer = ProductReviewSerializer(reviews, many=True)
         return Response(serializer.data)
     except Product.DoesNotExist:
         return Response({'error': 'Product not found'}, status=404)
@@ -222,3 +226,39 @@ def get_variants(request):
             'status': 'error',
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_user_ordered_product(request, productId):
+    try:
+        product = Product.objects.get(productId=productId)
+        has_ordered = OrderItem.objects.filter(
+            user=request.user,
+            product=product,
+            is_ordered=True
+        ).exists()
+
+        # Checks If orderItem status is delivered from AllStatus field
+        if has_ordered:
+            has_ordered = OrderItem.objects.filter(
+                user=request.user,
+                product=product,
+                is_ordered=True,
+                currentStatus__status='Delivered'
+            ).exists()
+
+        return Response({
+            'status': 'success',
+            'hasOrdered': has_ordered
+        })
+    except Product.DoesNotExist:
+        return Response({
+            'status': 'error',
+            'message': 'Product not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)

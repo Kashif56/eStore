@@ -14,4 +14,6 @@ urlpatterns = [
     path('get-all-reviews/<productId>/', views.getAllReviews, name='getAllReviews'),
     path('add-review/<productId>/', views.addProductReview, name='addProductReview'),
     path('variants/', views.get_variants, name='get-variants'),
+    
+    path('product-detail/<str:productId>/check-ordered/', views.check_user_ordered_product, name='check-user-ordered-product'),
 ]

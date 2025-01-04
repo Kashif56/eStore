@@ -12,17 +12,112 @@ import { useNavigate } from 'react-router-dom';
 
 const ProductDetail = () => {
   const { productId } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [selectedVariants, setSelectedVariants] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [userRating, setUserRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [hasOrdered, setHasOrdered] = useState(false);
+
+  const [reviews, setReviews] = useState([]);
 
   const {token} = useSelector((state) => state.auth);
-  const navigate = useNavigate();
 
-  
+  const fetchReviews = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/products/get-all-reviews/${productId}/`);
+      if (response.data) {
+        setReviews(response.data);
+      } else {
+        setToast({
+          type: 'error',
+          message: 'Failed to load Reviews'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching Reviews:', error);
+      setToast({
+        type: 'error',
+        message: error.response?.data?.error || 'Error loading Reviews'
+      });
+    }
+  };
+
+  // Check if user has ordered this product
+  useEffect(() => {
+    fetchReviews();
+    const checkOrderHistory = async () => {
+      if (!token) {
+        setHasOrdered(false);
+        return;
+      }
+
+      try {
+        const response = await axiosInstance.get(`/api/products/product-detail/${productId}/check-ordered/`);
+        setHasOrdered(response.data.hasOrdered);
+      } catch (error) {
+        console.error('Error checking order history:', error);
+        setHasOrdered(false);
+      }
+    };
+
+    checkOrderHistory();
+  }, [productId, token]);
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!userRating) {
+      setToast({
+        type: 'error',
+        message: 'Please select a rating'
+      });
+      return;
+    }
+    if (!reviewComment.trim()) {
+      setToast({
+        type: 'error',
+        message: 'Please write a review comment'
+      });
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post(`/api/products/add-review/${productId}/`, {
+        rating: userRating,
+        comment: reviewComment
+      });
+
+      const data = await response.data;
+
+      if (response.status === 200) {
+        setToast({
+          type: 'success',
+          message: 'Review submitted successfully!'
+        });
+        // Reset form
+        setUserRating(0);
+        setReviewComment('');
+        // Refresh product data to show new review
+        
+        fetchReviews();
+      } else {
+        setToast({
+          type: 'error',
+          message: data.message || 'Failed to submit review'
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      setToast({
+        type: 'error',
+        message: 'Failed to submit review. Please try again.'
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -283,8 +378,206 @@ const ProductDetail = () => {
           </div>
         </div>
 
+        {/* Product Attributes Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Product Attributes</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">Detailed specifications and features</p>
+            </div>
+            <div className="border-t border-gray-200">
+              <dl>
+                {product.attributes && product.attributes.map((attr, index) => (
+                  <div key={attr.id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}>
+                    <dt className="text-sm font-medium text-gray-500 capitalize">
+                      {attr.attribute.replace(/_/g, ' ')}
+                    </dt>
+                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                      {attr.value}
+                    </dd>
+                  </div>
+                ))}
+                {(!product.attributes || product.attributes.length === 0) && (
+                  <div className="px-4 py-5">
+                    <p className="text-sm text-gray-500">No attributes available for this product.</p>
+                  </div>
+                )}
+              </dl>
+            </div>
+          </div>
+        </div>
+
         {/* Reviews Section */}
-        <ReviewSection reviews={product.reviews || []} productId={productId} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-12">
+          <div className="bg-white shadow sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Product Reviews</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">Customer feedback and ratings</p>
+            </div>
+            
+            <div className="border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                {/* Reviews List */}
+                <div className="space-y-6">
+                  {reviews && reviews.map((review) => (
+                    <div key={review.id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center mb-2">
+                        <div className="flex-shrink-0">
+                          <img
+                            className="h-10 w-10 rounded-full"
+                            src={review.user.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'}
+                            alt={review.user.username}
+                          />
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-gray-900">
+                            {review.user.username}</p>
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <svg
+                                key={i}
+                                className={`h-5 w-5 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            ))}
+                          </div>
+                          <p className="text-sm text-gray-500">{new Date(review.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700">{review.comment}</p>
+                    </div>
+                  ))}
+                  {(!product.reviews || product.reviews.length === 0) && (
+                    <p className="text-gray-500 text-center">No reviews yet. Be the first to review this product!</p>
+                  )}
+                </div>
+
+                {/* Review Form - Only show if user has ordered the product */}
+                {token ? (
+                  hasOrdered ? (
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Write a Review</h4>
+                      <form className="space-y-4" onSubmit={handleSubmitReview}>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Rating</label>
+                          <div className="flex items-center space-x-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((rating) => (
+                              <button
+                                key={rating}
+                                type="button"
+                                className="focus:outline-none"
+                                onClick={() => setUserRating(rating)}
+                              >
+                                <svg
+                                  className={`h-8 w-8 ${rating <= userRating ? 'text-yellow-400' : 'text-gray-300'} cursor-pointer hover:text-yellow-400`}
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="comment" className="block text-sm font-medium text-gray-700">
+                            Your Review
+                          </label>
+                          <div className="mt-1">
+                            <textarea
+                              id="comment"
+                              name="comment"
+                              rows={4}
+                              className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                              value={reviewComment}
+                              onChange={(e) => setReviewComment(e.target.value)}
+                              placeholder="Share your thoughts about the product..."
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            Submit Review
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="text-center">
+                        <svg
+                          className="mx-auto h-12 w-12 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">Purchase Required</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          You need to purchase this product before you can write a review.
+                        </p>
+                        <div className="mt-6">
+                          <button
+                            type="button"
+                            onClick={() => navigate('/products')}
+                            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            Continue Shopping
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <div className="bg-white rounded-lg p-6 border border-gray-200">
+                    <div className="text-center">
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                        />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">Login Required</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Please log in to write a review.
+                      </p>
+                      <div className="mt-6">
+                        <button
+                          type="button"
+                          onClick={() => navigate('/login')}
+                          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Log In
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

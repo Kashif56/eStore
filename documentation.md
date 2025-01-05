@@ -114,4 +114,3 @@ A modern, full-stack e-commerce platform built with React and Django, featuring 
 - Error handling
 - Form validation
 - Modal dialogs
-

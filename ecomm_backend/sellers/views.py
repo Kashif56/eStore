@@ -202,7 +202,6 @@ def addProduct(request):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
 def updateProduct(request, productId):
     try:
         print(f"Attempting to update product with ID: {productId}")
@@ -912,11 +911,11 @@ def update_return_request_status(request, orderItemId):
             'message': f'Return request status updated to {new_status}'
         })
 
-    except (OrderItem.DoesNotExist, ReturnRequest.DoesNotExist):
+    except (OrderItem.DoesNotExist, ReturnRequest.DoesNotExist) as e:
         return Response({
             'status': 'error',
-            'message': 'Order or return request not found'
-        }, status=status.HTTP_404_NOT_FOUND)
+            'message': str(e)
+        }, status=404)
     except Exception as e:
         print(f"Error in update_return_request_status: {str(e)}")
         return Response({
@@ -1015,6 +1014,92 @@ def process_refund(request, order_item_id):
             'status': 'error',
             'message': str(e)
         }, status=404)
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@api_view(['GET'])
+def get_seller_by_id(request, seller_id):
+    try:
+        seller = Seller.objects.get(id=seller_id)
+        serializer = SellerSerializer(seller)
+        
+        # Get seller statistics
+        total_products = Product.objects.filter(seller=seller).count()
+        total_orders = OrderItem.objects.filter(product__seller=seller).count()
+        total_sales = OrderItem.objects.filter(
+            product__seller=seller,
+            status=OrderItemStatus.DELIVERED
+        ).aggregate(
+            total=Sum(F('quantity') * F('price'))
+        )['total'] or 0
+        
+        avg_rating = ProductReview.objects.filter(
+            product__seller=seller
+        ).aggregate(
+            avg=Avg('rating')
+        )['avg'] or 0
+        
+        response_data = {
+            **serializer.data,
+            'statistics': {
+                'total_products': total_products,
+                'total_orders': total_orders,
+                'total_sales': total_sales,
+                'average_rating': round(avg_rating, 1)
+            }
+        }
+        
+        return Response(response_data)
+    except Seller.DoesNotExist:
+        return Response({
+            'error': 'Seller not found'
+        }, status=404)
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=500)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_seller_profile(request):
+    try:
+        seller = request.user.seller
+        
+        # Update seller profile
+        seller.business_name = request.data.get('business_name', seller.business_name)
+        seller.business_address = request.data.get('business_address', seller.business_address)
+        seller.phone_number = request.data.get('phone_number', seller.phone_number)
+        seller.save()
+        
+        return Response({
+            'status': 'success',
+            'message': 'Profile updated successfully',
+            'data': SellerSerializer(seller).data
+        })
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_seller_account(request):
+    try:
+        seller = request.user.seller
+        user = request.user
+        
+        # Delete seller profile
+        seller.delete()
+      
+        
+        return Response({
+            'status': 'success',
+            'message': 'Seller account deleted successfully'
+        })
     except Exception as e:
         return Response({
             'status': 'error',

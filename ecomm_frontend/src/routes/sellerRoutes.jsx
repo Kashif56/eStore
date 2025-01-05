@@ -10,6 +10,7 @@ const EditProduct = lazy(() => import('../pages/seller/EditProduct'));
 const Orders = lazy(() => import('../pages/seller/Orders'));
 const OrderItemDetail = lazy(() => import('../pages/seller/OrderItemDetail'));
 const Approval = lazy(() => import('../pages/seller/Approval'));
+const SellerProfile = lazy(() => import('../pages/seller/SellerProfile'));
 
 export const sellerRoutes = {
   path: '/seller',
@@ -50,6 +51,14 @@ export const sellerRoutes = {
     {
       path: 'orders/order-item-detail/:orderItemId',
       element: <SellerRoute><OrderItemDetail /></SellerRoute>,
+    },
+    {
+      path: 'profile',
+      element: <SellerRoute><SellerProfile /></SellerRoute>,
+    },
+    {
+      path: 'profile/:id',
+      element: <SellerProfile />,
     }
   ],
 };

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance';
 import Toast from '../../components/Toast';
-import { setIsSellerApproved } from '../../features/sellerSlice';
+
 
 const Approval = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const Approval = () => {
   const [sellerInfo, setSellerInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
-  const dispatch = useDispatch();
+
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -19,11 +19,11 @@ const Approval = () => {
       return;
     }
     fetchSellerInfo();
-    if (sellerInfo && sellerInfo.is_approved) {
+    if (sellerInfo?.is_approved) {
       localStorage.setItem('isSellerApproved', true);
       navigate('/seller/dashboard/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, sellerInfo]);
 
   const fetchSellerInfo = async () => {
     try {

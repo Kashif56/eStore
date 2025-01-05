@@ -66,7 +66,7 @@ const ProductCard = ({ product }) => {
           )}
 
           {/* Product name */}
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[40px]">
+          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[20px]">
             {product.name}
           </h3>
 

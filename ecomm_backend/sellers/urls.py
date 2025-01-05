@@ -10,6 +10,8 @@ urlpatterns = [
     path('dashboard/top-products/', views.get_top_products, name='top-products'),
     path('register/', views.register_seller, name='register-seller'),
     path('profile/', views.getSellerProfile, name='get-seller-profile'),
+    path('profile/update/', views.update_seller_profile, name='update-seller-profile'),
+    path('profile/delete/', views.delete_seller_account, name='delete-seller-account'),
     
     # Endpoints for Product Management
     path('products/', views.sellerProducts, name='seller-products'),

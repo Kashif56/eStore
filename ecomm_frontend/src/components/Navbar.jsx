@@ -23,6 +23,8 @@ const Navbar = () => {
 
   const hasSellerAccount = localStorage.getItem('hasSellerAccount');
   const isSellerApproved = localStorage.getItem('isSellerApproved');
+
+  const username = localStorage.getItem('username');
   
   const closeTimeout = useRef(null);
 
@@ -59,9 +61,13 @@ const Navbar = () => {
       }
     };
 
-    fetchCartCount();
+    if(isAuthenticated) {
+      fetchCartCount();
+    }
+
+    
     // Set up an interval to refresh cart count every 30 seconds
-    const interval = setInterval(fetchCartCount, 30000);
+    const interval = setInterval(fetchCartCount, 300000);
     
     return () => clearInterval(interval);
   }, [isAuthenticated]);

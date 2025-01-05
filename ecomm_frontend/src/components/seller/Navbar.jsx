@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MdLightMode, MdDarkMode, MdNotifications, MdAccountCircle } from 'react-icons/md';
+import { MdLightMode, MdDarkMode, MdNotifications, MdAccountCircle, MdExpandMore } from 'react-icons/md';
 import { useTheme } from '../../context/ThemeContext';
+
 
 const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    // Add logout logic here
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 shadow-md z-30">
@@ -29,28 +35,56 @@ const Navbar = () => {
           >
             {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
           </button>
+          
           <button className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full relative">
             <MdNotifications size={24} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-          <Link
-            to="/seller/profile"
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-          >
-            Profile
-          </Link>
-          <button
-            onClick={() => navigate('/seller/settings')}
-            className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-          >
-            <MdAccountCircle size={24} />
-          </button>
-          <button
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-            onClick={() => {/* Add logout logic */}}
-          >
-            Logout
-          </button>
+
+          {/* Profile Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <MdAccountCircle size={24} className="mr-2" />
+              Profile
+              <MdExpandMore size={20} className="ml-1" />
+            </button>
+
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5">
+                <div className="py-1" role="menu" aria-orientation="vertical">
+                  <Link
+                    to={`/seller/profile/`}
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    role="menuitem"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    View Profile
+                  </Link>
+                  <Link
+                    to="/seller/settings"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    role="menuitem"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsProfileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    role="menuitem"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

@@ -175,22 +175,54 @@ const GraphSkeleton = () => (
 const PayoutStatsCard = ({ title, value, count, icon, color, loading }) => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
     <div className="flex items-center">
-      <div className={`p-3 rounded-full ${color} bg-opacity-10 mr-4`}>
+      <div className={`p-3 rounded-full ${color} bg-opacity-10 dark:bg-opacity-20 mr-4`}>
         {icon}
       </div>
       <div>
-        <p className="text-sm font-medium text-gray-600">{title}</p>
-        <p className="text-2xl font-semibold text-gray-900">{formatCurrency(value)}</p>
-        <p className="text-sm text-gray-500">{count} Payouts</p>
+        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+        <p className="text-2xl font-semibold text-gray-900 dark:text-white">{formatCurrency(value)}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{count} Payouts</p>
       </div>
     </div>
     {loading && (
       <div className="animate-pulse mt-4">
-        <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
       </div>
     )}
   </div>
 );
+
+const TopProductCard = ({ product, loading }) => {
+  if (loading) {
+    return (
+      <div className="animate-pulse bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-12 h-12 rounded-lg object-cover"
+          />
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white">{product.name}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{product.orders} orders</p>
+          </div>
+        </div>
+        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+          {formatCurrency(product.revenue)}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -560,32 +592,11 @@ const Dashboard = () => {
           ) : (
             <div className="space-y-4">
               {topProducts.map((product, index) => (
-                <div 
+                <TopProductCard
                   key={index}
-                  className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
-                  onClick={() => navigate(`/seller/products/${product.product_id}`)}
-                >
-                  <img 
-                    src={product.product_image || 'https://via.placeholder.com/48'} 
-                    alt={product.product_name || 'Product'}
-                    className="w-12 h-12 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/48';
-                    }}
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                      {product.product_name || 'Untitled Product'}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {product.total_orders || 0} units sold
-                    </p>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {formatCurrency(product.total_sales || 0)}
-                  </p>
-                </div>
+                  product={product}
+                  loading={topProductsLoading}
+                />
               ))}
             </div>
           )}

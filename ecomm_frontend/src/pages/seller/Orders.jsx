@@ -87,22 +87,22 @@ const Orders = () => {
     switch (status) {
       case 'Pending':
       case 'Return Requested':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100';
       case 'Processing':
       case 'Return Approved':
-        return 'bg-indigo-100 text-indigo-800';
+        return 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-100';
       case 'Shipped':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100';
       case 'Delivered':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100';
       case 'Returned':
       case 'Return Rejected':
       case 'Cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100';
       case 'Refunded':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
     }
   };
 
@@ -164,16 +164,16 @@ const Orders = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6 ml-64">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 ml-64">
         <div className="flex justify-center items-center">
-          <FontAwesomeIcon icon={faSpinner} className="text-indigo-600 text-4xl animate-spin" />
+          <FontAwesomeIcon icon={faSpinner} className="text-indigo-600 dark:text-indigo-400 text-4xl animate-spin" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 ml-64">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 ml-64">
       <div className="max-w-7xl mx-auto">
         {/* Order Sections */}
         <div className="mb-8">
@@ -184,14 +184,14 @@ const Orders = () => {
                 onClick={() => setActiveSection(section.id)}
                 className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   activeSection === section.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                    ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                 }`}
               >
                 <FontAwesomeIcon icon={section.icon} className="mr-2 h-4 w-4" />
                 {section.label}
                 {activeSection === section.id && (
-                  <span className="ml-2 bg-indigo-500 text-white px-2 py-0.5 rounded-full text-xs">
+                  <span className="ml-2 bg-indigo-500 dark:bg-indigo-400 text-white px-2 py-0.5 rounded-full text-xs">
                     {filteredOrderItems.length}
                   </span>
                 )}
@@ -201,7 +201,7 @@ const Orders = () => {
         </div>
 
         {/* Orders List */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
           {sections.find(s => s.id === activeSection)?.label}
         </h1>
         
@@ -210,7 +210,7 @@ const Orders = () => {
             filteredOrderItems.map((item) => (
               <div
                 key={item.orderItemId}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
               >
                 <div className="flex flex-col sm:flex-row justify-between">
                   <div className="flex-1">
@@ -221,16 +221,16 @@ const Orders = () => {
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                           {item.product.name}
                         </h3>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           Quantity: {item.qty}
                         </p>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           Order #{item.orderItemId} • {new Date(item.created_at).toLocaleDateString()}
                         </p>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           Customer: {item.user.name}
                         </p>
                       </div>
@@ -243,12 +243,10 @@ const Orders = () => {
                     
                     {/* Action Buttons */}
                     <div className="mt-4 flex flex-wrap gap-2">
-                     
-                      
                       {/* View Details Button */}
                       <Link
                         to={`/seller/orders/order-item-detail/${item.orderItemId}`}
-                        className="px-4 py-2 rounded-lg text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
+                        className="px-4 py-2 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/70"
                       >
                         View Details
                       </Link>
@@ -256,10 +254,10 @@ const Orders = () => {
                   </div>
                   <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col items-end justify-between">
                     <div className="text-right">
-                      <p className="text-lg font-medium text-gray-900">
+                      <p className="text-lg font-medium text-gray-900 dark:text-white">
                         {formatPrice(item.product.base_price * item.qty, 'PKR')}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {formatPrice(item.product.base_price, 'PKR')} each
                       </p>
                     </div>
@@ -271,10 +269,10 @@ const Orders = () => {
             <div className="text-center py-12">
               <FontAwesomeIcon 
                 icon={sections.find(s => s.id === activeSection)?.icon} 
-                className="h-12 w-12 text-gray-400 mb-4"
+                className="h-12 w-12 text-gray-400 dark:text-gray-600 mb-4"
               />
-              <h3 className="text-lg font-medium text-gray-900">No Orders Found</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">No Orders Found</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {activeSection === 'all' 
                   ? "You don't have any orders yet."
                   : `You don't have any ${activeSection.replace('-', ' ')} orders.`}

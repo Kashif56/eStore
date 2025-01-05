@@ -6,8 +6,8 @@ import Toast from '../../components/Toast';
 
 const PayoutStatusBadge = ({ status }) => {
   const styles = {
-    paid: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
+    paid: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100',
+    pending: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100',
   };
 
   return (
@@ -22,9 +22,9 @@ const PayoutTable = ({ payouts, loading }) => {
     return (
       <div className="animate-pulse">
         {[...Array(5)].map((_, index) => (
-          <div key={index} className="border-b border-gray-200 py-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div key={index} className="border-b border-gray-200 dark:border-gray-700 py-4">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
           </div>
         ))}
       </div>
@@ -34,51 +34,51 @@ const PayoutTable = ({ payouts, loading }) => {
   if (!payouts.length) {
     return (
       <div className="text-center py-12">
-        <FaMoneyBillWave className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No payouts</h3>
-        <p className="mt-1 text-sm text-gray-500">No payout records found.</p>
+        <FaMoneyBillWave className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No payouts</h3>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">No payout records found.</p>
       </div>
     );
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Payout ID
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Order Item
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Amount
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Date
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
           {payouts.map((payout) => (
-            <tr key={payout.payoutId} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <tr key={payout.payoutId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                 {payout.payoutId}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                 {payout.orderItem.orderItemId}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                 {formatCurrency(payout.amount)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <PayoutStatusBadge status={payout.is_paid ? 'Paid' : 'Pending'} />
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                 {new Date(payout.created_at).toLocaleDateString()}
               </td>
             </tr>
@@ -148,7 +148,7 @@ const Payouts = () => {
     );
 
   return (
-    <div className="flex-1 ml-64 p-8 bg-gray-50">
+    <div className="flex-1 ml-64 p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {toast && (
         <Toast
           message={toast.message}
@@ -159,48 +159,48 @@ const Payouts = () => {
 
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Payouts</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payouts</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Manage and track all your payment transactions
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 text-green-800">
+              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">
                 <FaMoneyBillWave className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Paid</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Paid</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                   {formatCurrency(stats.totalPaid)}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 text-yellow-800">
+              <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100">
                 <FaMoneyBillWave className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                   {formatCurrency(stats.totalPending)}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 text-blue-800">
+              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100">
                 <FaMoneyBillWave className="h-6 w-6" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Payouts</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Payouts</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                   {stats.count}
                 </p>
               </div>
@@ -209,7 +209,7 @@ const Payouts = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
           <div className="p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
               <div className="flex-1 max-w-lg">
@@ -217,16 +217,20 @@ const Payouts = () => {
                   <input
                     type="text"
                     placeholder="Search by Payout ID or Order ID"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                             focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                  <FaSearch className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" />
                 </div>
               </div>
               <div className="flex space-x-4">
                 <select
-                  className="pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-3 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
@@ -234,7 +238,9 @@ const Payouts = () => {
                   <option value="paid">Paid</option>
                   <option value="pending">Pending</option>
                 </select>
-                <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 
+                                rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                hover:bg-gray-50 dark:hover:bg-gray-600">
                   <FaFileDownload className="mr-2" />
                   Export
                 </button>
@@ -244,7 +250,7 @@ const Payouts = () => {
         </div>
 
         {/* Payouts Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <PayoutTable payouts={filteredPayouts} loading={loading} />
         </div>
       </div>

@@ -71,19 +71,19 @@ const StatusUpdateModal = memo(({
   };
 
   return (
-    <div className={`fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full ${showModal ? '' : 'hidden'}`}>
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className={`fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full ${showModal ? '' : 'hidden'}`}>
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
         <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Update Order Status</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Update Order Status</h3>
           <div className="mt-2 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                 Select New Status
               </label>
               <select
                 value={selectedStatus}
                 onChange={handleStatusChange}
-                className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
               >
                 <option value="">Select Status</option>
                 {getNextStatuses(currentStatus || 'Pending').map((status) => (
@@ -95,7 +95,7 @@ const StatusUpdateModal = memo(({
             {selectedStatus === 'Shipped' && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                     Shipped From
                   </label>
                   <input
@@ -106,11 +106,11 @@ const StatusUpdateModal = memo(({
                       shippedFrom: e.target.value
                     }))}
                     placeholder="Enter shipping origin"
-                    className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                     Shipped To
                   </label>
                   <input
@@ -121,11 +121,11 @@ const StatusUpdateModal = memo(({
                       shippedTo: e.target.value
                     }))}
                     placeholder="Enter shipping destination"
-                    className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                     Courier Service
                   </label>
                   <input
@@ -136,11 +136,11 @@ const StatusUpdateModal = memo(({
                       courier: e.target.value
                     }))}
                     placeholder="Enter courier service name"
-                    className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                     Tracking ID
                   </label>
                   <input
@@ -151,7 +151,7 @@ const StatusUpdateModal = memo(({
                       trackingId: e.target.value
                     }))}
                     placeholder="Enter tracking number"
-                    className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ const StatusUpdateModal = memo(({
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
@@ -173,7 +173,7 @@ const StatusUpdateModal = memo(({
                     (!shippingDetails.shippedFrom || !shippingDetails.shippedTo || 
                      !shippingDetails.courier || !shippingDetails.trackingId)
                   )}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processing ? (
                   <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
@@ -214,19 +214,19 @@ const ReturnRequestModal = memo(({
   };
 
   return (
-    <div className={`fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full ${showModal ? '' : 'hidden'}`}>
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className={`fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full ${showModal ? '' : 'hidden'}`}>
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
         <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Update Return Request</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Update Return Request</h3>
           <div className="mt-2 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                 Select Status
               </label>
               <select
                 value={selectedStatus}
                 onChange={handleStatusChange}
-                className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
               >
                 <option value="">Select Status</option>
                 {['Approved', 'Rejected', 'Cancelled', 'Returned'].map((status) => (
@@ -235,13 +235,13 @@ const ReturnRequestModal = memo(({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                 Reason (Optional)
               </label>
               <textarea
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
                 rows="3"
                 placeholder="Enter reason for status change"
               />
@@ -249,14 +249,14 @@ const ReturnRequestModal = memo(({
             <div className="flex justify-end space-x-3 mt-4">
               <button
                 onClick={handleClose}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!selectedStatus || processing}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processing ? (
                   <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
@@ -297,46 +297,46 @@ const RefundModal = memo(({
   };
 
   return (
-    <div className={`fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full ${showModal ? '' : 'hidden'}`}>
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className={`fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full ${showModal ? '' : 'hidden'}`}>
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
         <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Process Refund</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Process Refund</h3>
           <div className="mt-2 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Order Item ID
               </label>
               <input
                 type="text"
                 value={orderItem?.orderItemId || ''}
                 readOnly
-                className="w-full rounded-md border border-gray-300 p-2 bg-gray-50"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Product
               </label>
               <input
                 type="text"
                 value={orderItem?.product?.name || ''}
                 readOnly
-                className="w-full rounded-md border border-gray-300 p-2 bg-gray-50"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Amount
               </label>
               <input
                 type="text"
                 value={formatPrice(orderItem?.orderItemTotal || 0, 'PKR')}
                 readOnly
-                className="w-full rounded-md border border-gray-300 p-2 bg-gray-50"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Payment Method
               </label>
               <input
@@ -344,11 +344,11 @@ const RefundModal = memo(({
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 placeholder="Enter payment method"
-                className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                 Transaction ID
               </label>
               <input
@@ -356,7 +356,7 @@ const RefundModal = memo(({
                 value={transactionId}
                 onChange={(e) => setTransactionId(e.target.value)}
                 placeholder="Enter transaction ID"
-                className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300"
               />
             </div>
 
@@ -364,7 +364,7 @@ const RefundModal = memo(({
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
@@ -372,7 +372,7 @@ const RefundModal = memo(({
                 type="button"
                 onClick={handleSubmit}
                 disabled={!paymentMethod || !transactionId || processing}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processing ? (
                   <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
@@ -504,17 +504,17 @@ function OrderItemDetail() {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
       case 'Processing':
-        return 'bg-indigo-100 text-indigo-800';
+        return 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200';
       case 'Shipped':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
       case 'Delivered':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
       case 'Returned':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200';
     }
   };
 
@@ -557,15 +557,15 @@ function OrderItemDetail() {
   };
 
   const ActionButtons = () => (
-    <div className="border-t border-gray-200 pt-6">
+    <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
       <div className="flex flex-wrap gap-4">
         <button
           onClick={() => setShowStatusModal(true)}
           disabled={['Cancelled', 'Refunded', 'Delivered'].includes(orderItem?.currentStatus?.status)}
           className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 
             ${!['Cancelled', 'Refunded', 'Delivered'].includes(orderItem?.currentStatus?.status)
-              ? 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-400 focus:ring-indigo-500 dark:focus:ring-indigo-300'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-200 cursor-not-allowed'
             }`}
         >
           Update Order Status
@@ -576,8 +576,8 @@ function OrderItemDetail() {
           disabled={orderItem?.currentStatus?.status == 'Returned' || orderItem?.currentStatus?.status == 'Refunded' || !isReturnRequest}
           className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 
             ${orderItem.currentStatus?.status !== 'Returned' && orderItem.currentStatus?.status !== 'Refunded' && isReturnRequest
-              ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-400 focus:ring-blue-500 dark:focus:ring-blue-300'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-200 cursor-not-allowed'
             }`}
         >
           {processingStatus ? (
@@ -591,8 +591,8 @@ function OrderItemDetail() {
           disabled={!['Returned'].includes(orderItem?.currentStatus?.status) || processingStatus}
           className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 
             ${['Returned'].includes(orderItem?.currentStatus?.status)
-              ? 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-green-600 dark:bg-green-500 text-white hover:bg-green-700 dark:hover:bg-green-400 focus:ring-green-500 dark:focus:ring-green-300'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-200 cursor-not-allowed'
             }`}
         >
           {processingStatus ? (
@@ -606,8 +606,8 @@ function OrderItemDetail() {
           disabled={!['Pending'].includes(orderItem?.currentStatus?.status)}
           className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 
             ${['Pending'].includes(orderItem?.currentStatus?.status)
-              ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-400 focus:ring-red-500 dark:focus:ring-red-300'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-200 cursor-not-allowed'
             }`}
         >
           Cancel Order
@@ -618,9 +618,9 @@ function OrderItemDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6 ml-64">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 ml-64">
         <div className="flex justify-center items-center">
-          <FontAwesomeIcon icon={faSpinner} className="text-indigo-600 text-4xl animate-spin" />
+          <FontAwesomeIcon icon={faSpinner} className="text-indigo-600 dark:text-indigo-400 text-4xl animate-spin" />
         </div>
       </div>
     );
@@ -628,9 +628,9 @@ function OrderItemDetail() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6 ml-64">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-          <div className="text-center text-red-600">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 ml-64">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="text-center text-red-600 dark:text-red-400">
             <FontAwesomeIcon icon={faExclamationTriangle} className="text-4xl mb-4" />
             <p>{error}</p>
           </div>
@@ -641,9 +641,9 @@ function OrderItemDetail() {
 
   if (!orderItem) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6 ml-64">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-          <div className="text-center text-gray-600">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 ml-64">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="text-center text-gray-600 dark:text-gray-400">
             <p>Order not found</p>
           </div>
         </div>
@@ -652,24 +652,24 @@ function OrderItemDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 ml-64">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 ml-64">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <Link
           to="/seller/orders"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-500 mb-6"
+          className="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mb-6"
         >
           <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
           Back to Orders
         </Link>
 
         {/* Order Details */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Order #{orderItem.orderItemId}</h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Order #{orderItem.orderItemId}</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Placed on {new Date(orderItem.created_at).toLocaleDateString()}
               </p>
             </div>
@@ -692,111 +692,119 @@ function OrderItemDetail() {
           </div>
 
           {/* Customer Information */}
-          <div className="border-t border-gray-200 pt-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               <FontAwesomeIcon icon={faUser} className="mr-2" />
               Customer Information
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Name</p>
-                <p className="font-medium">{orderItem.user?.username}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Name</p>
+                <p className="font-medium dark:text-white">{orderItem.user?.username}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium">{orderItem.user?.email}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                <p className="font-medium dark:text-white">{orderItem.user?.email}</p>
               </div>
             </div>
           </div>
 
           {/* Product Information */}
-          <div className="border-t border-gray-200 pt-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               <FontAwesomeIcon icon={faBox} className="mr-2" />
               Product Information
             </h2>
-            <div className="flex items-start space-x-4">
-              <img
-                src={`http://localhost:8000${orderItem.product?.images[0]?.image}`}
-                alt={orderItem.product?.name}
-                className="w-24 h-24 object-cover rounded-lg"
-              />
-              <div className="flex-1">
-                <h3 className="text-lg font-medium text-gray-900">{orderItem.product?.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">Quantity: {orderItem.qty}</p>
-                <p className="text-sm font-medium text-gray-900 mt-1">
-                  Price: {formatPrice(orderItem.product?.base_price * orderItem.qty, 'PKR')}
+            <div className="flex items-start justify-between space-x-4">
+              <div className="flex items-start space-x-4">
+                <img
+                  src={`http://localhost:8000${orderItem.product?.images[0]?.image}`}
+                  alt={orderItem.product?.name}
+                  className="w-24 h-24 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">{orderItem.product?.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Quantity: {orderItem.qty}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                    Unit Price: {formatPrice(orderItem.product?.base_price, 'PKR')}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  {formatPrice(orderItem.orderItemTotal, 'PKR')}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Payment Information */}
-          <div className="border-t border-gray-200 pt-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               <FontAwesomeIcon icon={faCreditCard} className="mr-2" />
               Payment Information <br></br>
-              <span className="text-sm text-gray-500">{orderItem.paymentDetail.paymentId}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{orderItem.paymentDetail.paymentId}</span>
             </h2>
             {orderItem.paymentDetail ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Payment Method</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Payment Method</p>
                     <div className="flex items-center mt-1">
                       <FontAwesomeIcon icon={faMoneyBill} className="mr-2 text-gray-400" />
-                      <p className="font-medium">{orderItem.paymentDetail.paymentMethod}</p>
+                      <p className="font-medium dark:text-white">{orderItem.paymentDetail.paymentMethod}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Amount</p>
-                    <p className="font-medium">{formatPrice(orderItem.paymentDetail.amount, 'PKR')}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Amount</p>
+                    <p className="font-medium dark:text-white">{formatPrice(orderItem.paymentDetail.amount, 'PKR')}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Payment Status</p>
-                    <p className={`font-medium ${orderItem.paymentDetail.is_paid ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Payment Status</p>
+                    <p className={`font-medium ${orderItem.paymentDetail.is_paid ? 'text-green-600' : 'text-red-600'} dark:${orderItem.paymentDetail.is_paid ? 'text-green-400' : 'text-red-400'}`}>
                       {orderItem.paymentDetail.is_paid ? 'Paid' : 'Pending'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Payment Date</p>
-                    <p className="font-medium">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Payment Date</p>
+                    <p className="font-medium dark:text-white">
                       {new Date(orderItem.paymentDetail.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">No payment information available</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">No payment information available</p>
             )}
           </div>
 
           {/* Shipping Information */}
-          <div className="border-t border-gray-200 pt-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" />
               Shipping Information
             </h2>
             {orderItem.shipping_address ? (
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
                 <div className="flex flex-col space-y-4">
                   {/* Shipping Status */}
                   {orderItem.currentStatus?.status === 'Shipped' && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 mb-4">
                       <div className="flex items-center mb-3">
-                        <FontAwesomeIcon icon={faShippingFast} className="text-blue-500 mr-2" />
-                        <h3 className="text-sm font-medium text-blue-900">Shipping Details</h3>
+                        <FontAwesomeIcon icon={faShippingFast} className="text-blue-500 dark:text-blue-300 mr-2" />
+                        <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">Shipping Details</h3>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <span className="text-xs text-blue-600">Courier Service</span>
-                          <p className="text-sm font-medium text-blue-900">{orderItem.courier || 'Not specified'}</p>
+                          <span className="text-xs text-blue-600 dark:text-blue-300">Courier Service</span>
+                          <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.courier || 'Not specified'}</p>
                         </div>
                         <div>
-                          <span className="text-xs text-blue-600">Tracking ID</span>
-                          <p className="text-sm font-medium text-blue-900">{orderItem.trackingId || 'Not specified'}</p>
+                          <span className="text-xs text-blue-600 dark:text-blue-300">Tracking ID</span>
+                          <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.trackingId || 'Not specified'}</p>
                         </div>
                       </div>
                     </div>
@@ -804,34 +812,34 @@ function OrderItemDetail() {
 
                   {/* Delivery Address */}
                   <div className="flex items-start space-x-3">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-500 mt-1" />
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-500 dark:text-indigo-300 mt-1" />
                     <div className="flex-1">
-                      <h3 className="text-sm font-medium text-gray-900">Delivery Address</h3>
-                      <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-800">
+                      <h3 className="text-sm font-medium text-gray-900 dark:text-white">Delivery Address</h3>
+                      <div className="mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <p className="text-sm text-gray-800 dark:text-gray-200">
                           {orderItem.shipping_address.street_address}
                           {orderItem.shipping_address.apartment && (
-                            <span className="block mt-1 text-gray-600">
+                            <span className="block mt-1 text-gray-600 dark:text-gray-400">
                               {orderItem.shipping_address.apartment}
                             </span>
                           )}
                         </p>
                         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
                           <div>
-                            <span className="text-xs text-gray-500">City</span>
-                            <p className="text-sm text-gray-800">{orderItem.shipping_address.city}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">City</span>
+                            <p className="text-sm text-gray-800 dark:text-gray-200">{orderItem.shipping_address.city}</p>
                           </div>
                           <div>
-                            <span className="text-xs text-gray-500">State</span>
-                            <p className="text-sm text-gray-800">{orderItem.shipping_address.state}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">State</span>
+                            <p className="text-sm text-gray-800 dark:text-gray-200">{orderItem.shipping_address.state}</p>
                           </div>
                           <div>
-                            <span className="text-xs text-gray-500">Postal Code</span>
-                            <p className="text-sm text-gray-800">{orderItem.shipping_address.postal_code}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Postal Code</span>
+                            <p className="text-sm text-gray-800 dark:text-gray-200">{orderItem.shipping_address.postal_code}</p>
                           </div>
                           <div>
-                            <span className="text-xs text-gray-500">Country</span>
-                            <p className="text-sm text-gray-800">{orderItem.shipping_address.country}</p>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Country</span>
+                            <p className="text-sm text-gray-800 dark:text-gray-200">{orderItem.shipping_address.country}</p>
                           </div>
                         </div>
                       </div>
@@ -840,13 +848,13 @@ function OrderItemDetail() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">No shipping information available</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">No shipping information available</p>
             )}
           </div>
 
           {/* Order Timeline */}
-          <div className="border-t border-gray-200 pt-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               <FontAwesomeIcon icon={faClock} className="mr-2" />
               Order Timeline
             </h2>
@@ -857,20 +865,20 @@ function OrderItemDetail() {
                     <div className="relative pb-8">
                       {idx !== (orderItem.allStatus?.length || 0) - 1 ? (
                         <span
-                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
                           aria-hidden="true"
                         />
                       ) : null}
                       <div className="relative flex space-x-3">
                         <div>
-                          <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                            status.status === 'Pending' ? 'bg-yellow-500' :
-                            status.status === 'Processing' ? 'bg-indigo-500' :
-                            status.status === 'Shipped' ? 'bg-blue-500' :
-                            status.status === 'Delivered' ? 'bg-green-500' :
-                            status.status === 'Returned' ? 'bg-red-500' :
-                            status.status === 'Cancelled' ? 'bg-gray-500' :
-                            'bg-gray-400'
+                          <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-800 ${
+                            status.status === 'Pending' ? 'bg-yellow-500 dark:bg-yellow-900' :
+                            status.status === 'Processing' ? 'bg-indigo-500 dark:bg-indigo-900' :
+                            status.status === 'Shipped' ? 'bg-blue-500 dark:bg-blue-900' :
+                            status.status === 'Delivered' ? 'bg-green-500 dark:bg-green-900' :
+                            status.status === 'Returned' ? 'bg-red-500 dark:bg-red-900' :
+                            status.status === 'Cancelled' ? 'bg-gray-500 dark:bg-gray-900' :
+                            'bg-gray-400 dark:bg-gray-900'
                           }`}>
                             <FontAwesomeIcon 
                               icon={getStatusIcon(status.status)} 
@@ -881,25 +889,25 @@ function OrderItemDetail() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {status.status}
                             </p>
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                               {new Date(status.created_at).toLocaleString()}
                             </p>
                             {status.status === 'Return Requested' && returnRequest?.reason && (
-                              <div className="mt-2 bg-red-50 rounded-md p-3 space-y-2">
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">
-                                  <p className="font-medium text-red-900 mb-2">Return Request Details:</p>
+                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Request Details:</p>
                                   <div className="space-y-2">
                                     <div>
-                                      <p className="text-xs text-red-600">Return Reason</p>
-                                      <p className="text-sm text-red-800">{returnRequest?.reason || 'Not specified'}</p>
+                                      <p className="text-xs text-red-600 dark:text-red-300">Return Reason</p>
+                                      <p className="text-sm text-red-800 dark:text-red-200">{returnRequest?.reason || 'Not specified'}</p>
                                     </div>
                                     {returnRequest?.description && (
                                       <div>
-                                        <p className="text-xs text-red-600">Description</p>
-                                        <p className="text-sm text-red-800">{returnRequest.description}</p>
+                                        <p className="text-xs text-red-600 dark:text-red-300">Description</p>
+                                        <p className="text-sm text-red-800 dark:text-red-200">{returnRequest.description}</p>
                                       </div>
                                     )}
                                   </div>
@@ -909,13 +917,13 @@ function OrderItemDetail() {
                             {['Returned', 'Rejected', 'Refunded', 'Cancelled'].includes(status.status) && 
                              returnRequest?.currentStatus?.status === status.status && 
                              returnRequest?.currentStatus?.reason && (
-                              <div className="mt-2 bg-red-50 rounded-md p-3 space-y-2">
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">
-                                  <p className="font-medium text-red-900 mb-2">Return Status Update</p>
+                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
                                   <div className="space-y-2">
                                     <div>
-                                      <p className="text-xs text-red-600">Status Reason</p>
-                                      <p className="text-sm text-red-800">
+                                      <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
+                                      <p className="text-sm text-red-800 dark:text-red-200">
                                         {returnRequest.currentStatus.reason}
                                       </p>
                                     </div>
@@ -925,13 +933,13 @@ function OrderItemDetail() {
                             )}
                             {['Returned', 'Rejected', 'Refunded', 'Cancelled'].includes(status.status) && 
                              returnRequest?.allStatus?.find(s => s.status === status.status)?.reason && (
-                              <div className="mt-2 bg-red-50 rounded-md p-3 space-y-2">
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">
-                                  <p className="font-medium text-red-900 mb-2">Return Status Update</p>
+                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
                                   <div className="space-y-2">
                                     <div>
-                                      <p className="text-xs text-red-600">Status Reason</p>
-                                      <p className="text-sm text-red-800">
+                                      <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
+                                      <p className="text-sm text-red-800 dark:text-red-200">
                                         {returnRequest?.allStatus?.find(s => s.status === status.status)?.reason}
                                       </p>
                                     </div>
@@ -940,54 +948,54 @@ function OrderItemDetail() {
                               </div>
                             )}
                             {status.status === 'Shipped' && (
-                              <div className="mt-2 bg-blue-50 rounded-md p-3 space-y-2">
+                              <div className="mt-2 bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">
-                                  <p className="font-medium text-blue-900 mb-2">Shipping Details:</p>
+                                  <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">Shipping Details:</p>
                                   <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                      <p className="text-xs text-blue-600">Shipped From</p>
-                                      <p className="text-sm text-blue-800">{status.shipped_from || 'Not specified'}</p>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Shipped From</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{status.shipped_from || 'Not specified'}</p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-blue-600">Shipped To</p>
-                                      <p className="text-sm text-blue-800">{status.shipped_to || 'Not specified'}</p>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Shipped To</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{status.shipped_to || 'Not specified'}</p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-blue-600">Courier Service</p>
-                                      <p className="text-sm text-blue-800">{orderItem.courier || 'Not specified'}</p>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Courier Service</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.courier || 'Not specified'}</p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-blue-600">Tracking ID</p>
-                                      <p className="text-sm text-blue-800">{orderItem.trackingId || 'Not specified'}</p>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Tracking ID</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.trackingId || 'Not specified'}</p>
                                     </div>
                                   </div>
                                 </div>
                               </div>
                             )}
                             {status.status === 'Refunded' && orderItem.refund && (
-                              <div className="mt-2 bg-green-50 rounded-md p-3 space-y-2">
+                              <div className="mt-2 bg-green-50 dark:bg-green-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">
-                                  <p className="font-medium text-green-900 mb-2">Refund Details</p>
+                                  <p className="font-medium text-green-900 dark:text-green-100 mb-2">Refund Details</p>
                                   <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                      <p className="text-xs text-green-600">Refund ID</p>
-                                      <p className="text-sm text-green-800">{orderItem.refund.refundId}</p>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Refund ID</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.refundId}</p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-green-600">Amount</p>
-                                      <p className="text-sm text-green-800">{formatPrice(orderItem.refund.amount, 'PKR')}</p>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Amount</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{formatPrice(orderItem.refund.amount, 'PKR')}</p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-green-600">Payment Method</p>
-                                      <p className="text-sm text-green-800">{orderItem.refund.paymentMethod}</p>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Payment Method</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.paymentMethod}</p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-green-600">Transaction ID</p>
-                                      <p className="text-sm text-green-800">{orderItem.refund.transactionId}</p>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Transaction ID</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.transactionId}</p>
                                     </div>
                                     <div className="col-span-2">
-                                      <p className="text-xs text-green-600">Processed On</p>
-                                      <p className="text-sm text-green-800">
+                                      <p className="text-xs text-green-600 dark:text-green-300">Processed On</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">
                                         {new Date(orderItem.refund.created_at).toLocaleString()}
                                       </p>
                                     </div>
@@ -996,13 +1004,13 @@ function OrderItemDetail() {
                               </div>
                             )}
                             { returnRequest?.allStatus?.reason && (
-                              <div className="mt-2 bg-red-50 rounded-md p-3 space-y-2">
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
                               <div className="text-sm">
-                                <p className="font-medium text-red-900 mb-2">Return Request Details:</p>
+                                <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Request Details:</p>
                                 <div className="space-y-2">
                                   <div>
-                                    <p className="text-xs text-red-600">Return Reason</p>
-                                    <p className="text-sm text-red-800">{returnRequest?.currentStatus?.reason || 'Not specified'}</p>
+                                    <p className="text-xs text-red-600 dark:text-red-300">Return Reason</p>
+                                    <p className="text-sm text-red-800 dark:text-red-200">{returnRequest?.currentStatus?.reason || 'Not specified'}</p>
                                   </div>
                                 
                                 </div>

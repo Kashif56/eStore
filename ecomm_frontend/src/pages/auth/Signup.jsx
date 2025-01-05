@@ -94,6 +94,7 @@ const Signup = () => {
         // Store tokens in localStorage
         localStorage.setItem('accessToken', data.tokens.access);
         localStorage.setItem('refreshToken', data.tokens.refresh);
+        localStorage.setItem('username', formData.username);
         localStorage.setItem('user', JSON.stringify(data.data));
 
         toast.success('🎉 Account created successfully! Redirecting...', {

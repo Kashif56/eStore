@@ -75,6 +75,7 @@ const Login = () => {
         // Store tokens in localStorage
         localStorage.setItem('accessToken', data.access);
         localStorage.setItem('refreshToken', data.refresh);
+        localStorage.setItem('username', formData.username);
 
         // Dispatch login action with user data and tokens
         dispatch(login({

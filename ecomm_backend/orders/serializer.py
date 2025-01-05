@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Order, OrderItem, OrderItemStatus, Payment, ReturnRequest, ReturnRequestStatus, Refund
 from products.models import Product, ProductVariant
+from sellers.serializer import SellerSerializer
 
 
 
@@ -19,9 +20,11 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    seller = SellerSerializer(read_only=True)
+    
     class Meta:
         model = Product
-        fields = ['id', 'name', 'productId', 'description', 'base_price', 'discount_price', 
+        fields = ['id', 'name', 'seller', 'productId', 'description', 'base_price', 'discount_price', 
                  'stock', 'sold', 'is_active', 'images']
         depth = 1  # This will serialize the related images automatically
 

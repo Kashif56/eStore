@@ -1,6 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faStore,
+  faSpinner,
+  faBox,
+  faClock,
+  faCheck,
+  faTruck,
+  faUndo,
+  faExclamationTriangle,
+  faCreditCard,
+  faMapMarkerAlt,
+  faMoneyBill,
+  faUser,
+  faPhone,
+  faShippingFast,
+  faBoxOpen,
+  faFileInvoice,
+  faHandshake,
+  faTimesCircle
+} from '@fortawesome/free-solid-svg-icons';
 
 function OrderItemDetail() {
   const { orderItemId } = useParams();
@@ -16,8 +37,10 @@ function OrderItemDetail() {
     axiosInstance
       .get(`api/orders/order-item-detail/${orderItemId}/`)
       .then((res) => {
+        console.log('Order Item Response:', res.data);
         setOrderItem(res.data.data);
         setPaymentDetail(res.data.payment);
+       
         setError(null);
       })
       .catch((err) => {
@@ -43,6 +66,27 @@ function OrderItemDetail() {
         return 'bg-green-500 text-white';
       default:
         return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Pending':
+        return faClock;
+      case 'Processing':
+        return faBoxOpen;
+      case 'Processed':
+        return faFileInvoice;
+      case 'Shipped':
+        return faShippingFast;
+      case 'Delivered':
+        return faHandshake;
+      case 'Returned':
+        return faUndo;
+      case 'Cancelled':
+        return faTimesCircle;
+      default:
+        return faExclamationTriangle;
     }
   };
 
@@ -73,6 +117,19 @@ function OrderItemDetail() {
     }
   };
 
+  const isReturnEligible = () => {
+    const currentStatus = orderItem.allStatus[orderItem.allStatus.length - 1];
+    if (currentStatus.status !== 'Delivered') {
+      return false;
+    }
+
+    const deliveryDate = new Date(currentStatus.created_at);
+    const currentDate = new Date();
+    const daysDifference = Math.floor((currentDate - deliveryDate) / (1000 * 60 * 60 * 24));
+    
+    return daysDifference <= 7;
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4">
@@ -82,8 +139,12 @@ function OrderItemDetail() {
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 space-y-6">
             {/* Section 1: Basic Order Information */}
             <div className="border-b pb-6">
-              <h2 className="text-lg font-bold text-gray-800">Order ID: {orderItemId}</h2>
-              <p className="text-sm text-gray-500">Order Date: {orderItem.updated_at}</p>
+              <h1 className="text-lg font-bold text-gray-800">
+                <FontAwesomeIcon icon={faStore} className="text-indigo-600 mr-2" />
+                {orderItem?.product?.seller?.business_name}
+              </h1>
+              <h2>Order ID: {orderItemId}</h2>
+              <p className="text-sm text-gray-500">Order Date: {orderItem?.updated_at}</p>
 
               {/* Move Current Status Badge to the right */}
               <div className="flex justify-end mt-4">
@@ -113,7 +174,7 @@ function OrderItemDetail() {
                         </span>
                         Rs. {orderItem.product.discount_price}
     
-                        <span className="ml-3 text-white bg-green-100 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900">
+                        <span className="ml-3 bg-green-600 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900">
                           {Math.round(((orderItem.product.base_price - orderItem.product.discount_price) / orderItem.product.base_price) * 100)}% Off
                       </span>
                       </span>
@@ -130,61 +191,83 @@ function OrderItemDetail() {
 
             {/* Section 2: Order Item Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Order Item Status */}
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="text-lg font-bold text-blue-600 mb-4">Order Item Status</h3>
-                <div className="space-y-4">
-                  {orderItem.allStatus.map((status, index) => (
-                    <div
-                      key={status.id}
-                      className={`p-4 rounded-lg shadow-md border ${
-                        index === orderItem.allStatus.length - 1
-                          ? 'bg-green-50 border-green-500'
-                          : 'bg-white border-gray-200'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div
-                          className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                            index === orderItem.allStatus.length - 1
-                              ? 'bg-green-500 text-white'
-                              : 'bg-gray-300 text-gray-600'
-                          }`}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4M7 16l4 4m0 0l4-4m-4 4V4"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <p
-                            className={`text-lg font-semibold ${
-                              index === orderItem.allStatus.length - 1
-                                ? 'text-green-600'
-                                : 'text-gray-900'
-                            }`}
-                          >
-                            {status.status}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Updated: {new Date(status.updated_at).toLocaleString()}
-                          </p>
+              {/* Order Timeline */}
+            <div className="border-t border-gray-200 pt-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <FontAwesomeIcon icon={faClock} className="mr-2" />
+                Order Timeline
+              </h2>
+              <div className="flow-root">
+                <ul className="-mb-8">
+                  {orderItem.allStatus?.map((status, idx) => (
+                    <li key={status.id}>
+                      <div className="relative pb-8">
+                        {idx !== (orderItem.allStatus?.length || 0) - 1 ? (
+                          <span
+                            className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        <div className="relative flex space-x-3">
+                          <div>
+                            <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
+                              status.status === 'Pending' ? 'bg-yellow-500' :
+                              status.status === 'Processing' ? 'bg-indigo-500' :
+                              status.status === 'Shipped' ? 'bg-blue-500' :
+                              status.status === 'Delivered' ? 'bg-green-500' :
+                              status.status === 'Returned' ? 'bg-red-500' :
+                              status.status === 'Cancelled' ? 'bg-gray-500' :
+                              'bg-gray-400'
+                            }`}>
+                              <FontAwesomeIcon 
+                                icon={getStatusIcon(status.status)} 
+                                className="h-4 w-4 text-white"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {status.status}
+                              </p>
+                              <p className="mt-1 text-sm text-gray-500">
+                                {new Date(status.created_at).toLocaleString()}
+                              </p>
+                              {status.status === 'Shipped' && (
+                                <div className="mt-2 bg-blue-50 rounded-md p-3 space-y-2">
+                                  <div className="text-sm">
+                                    <p className="font-medium text-blue-900 mb-2">Shipping Details:</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div>
+                                        <p className="text-xs text-blue-600">Shipped From</p>
+                                        <p className="text-sm text-blue-800">{status.shipped_from || 'Not specified'}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-blue-600">Shipped To</p>
+                                        <p className="text-sm text-blue-800">{status.shipped_to || 'Not specified'}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-blue-600">Courier Service</p>
+                                        <p className="text-sm text-blue-800">{orderItem.courier || 'Not specified'}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-blue-600">Tracking ID</p>
+                                        <p className="text-sm text-blue-800">{orderItem.trackingId || 'Not specified'}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
+            </div>
 
               {/* Payment Status */}
               <div className="bg-blue-50 p-4 rounded-lg">
@@ -294,23 +377,23 @@ function OrderItemDetail() {
               </div>
             </div>
 
+            
+
             {/* Section 3: Buttons */}
             <div className="flex justify-end space-x-4">
-              {orderItem.allStatus[orderItem.allStatus.length - 1].status === 'Pending' && (<button className="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition">Cancel Order</button>)}
-              
-              
-              {orderItem.allStatus[orderItem.allStatus.length - 1].status === 'Shipped' && (<button className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition"> Track Order</button>)}
-
-              {/* Return Request Button */}
-              {currentStatus === 'Delivered' && (
-                <button
-                  onClick={() => setShowReturnModal(true)}
-                  className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-                >
-                  Request Return
+              {orderItem.allStatus[orderItem.allStatus.length - 1].status === 'Pending' && (
+                <button className="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition">
+                  Cancel Order
                 </button>
               )}
-            
+              {isReturnEligible() && (
+                <button 
+                  onClick={() => setShowReturnModal(true)}
+                  className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition"
+                >
+                  Return Request
+                </button>
+              )}
             </div>
           </div>
         ) : (

@@ -10,6 +10,7 @@ const initialState = {
   isAuthenticated: !!token, // Set isAuthenticated based on token presence
   isLoading: false,
   error: null,
+
 };
 
 export const authSlice = createSlice({
@@ -47,6 +48,9 @@ export const authSlice = createSlice({
       localStorage.setItem('accessToken', action.payload.token);
       localStorage.setItem('refreshToken', action.payload.refreshToken);
     },
+
+
+
   },
 });
 

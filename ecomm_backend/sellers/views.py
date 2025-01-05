@@ -65,6 +65,7 @@ def getSellerProfile(request):
             'status': 'success',
             'data': sellerSerializer.data
         })
+    
     except Seller.DoesNotExist:
         return Response({
             'status': 'error',
@@ -72,6 +73,7 @@ def getSellerProfile(request):
         }, status=404)
 
     except Exception as e:
+
         return Response({
             'error': str(e)
         }, status=500)

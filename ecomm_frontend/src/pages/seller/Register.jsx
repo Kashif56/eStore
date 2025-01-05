@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance';
 import Toast from '../../components/Toast';
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -31,6 +32,8 @@ const Register = () => {
         const response = await axiosInstance.get('/api/sellers/profile/');
         if (response.data?.status === 'success') {
           setSellerProfile(response.data.data);
+      
+
           if(response.data.data.is_approved == false) {
             navigate('/seller/approval');
           }
@@ -60,6 +63,19 @@ const Register = () => {
       const response = await axiosInstance.post('/api/sellers/register/', formData);
       
       if (response.data?.status === 'success') {
+        setToast({
+          type: 'success',
+          message: 'Registration successful'
+        });
+
+    
+
+        localStorage.setItem('hasSellerAccount', true);
+        localStorage.setItem('business_name', formData.business_name);
+        localStorage.setItem('business_address', formData.business_address);
+        localStorage.setItem('phone_number', formData.phone_number);
+       
+
         navigate('/seller/approval');
       } else {
         setToast({

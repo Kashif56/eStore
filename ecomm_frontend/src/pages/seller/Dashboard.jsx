@@ -28,6 +28,10 @@ import {
 } from '../../services/dashboardService';
 import { useNavigate } from 'react-router-dom';
 
+
+
+
+
 const TimeFilter = ({ isOpen, onClose, onSelect, currentPeriod }) => {
   const options = ['daily', 'monthly', 'yearly', 'all'];
   
@@ -187,6 +191,7 @@ const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
   const [topProductsLoading, setTopProductsLoading] = useState(true);
 
+
   const fetchCardStats = async (card, period) => {
     try {
       setCardLoading(prev => ({ ...prev, [card]: true }));
@@ -195,6 +200,7 @@ const Dashboard = () => {
       setError(null);
     } catch (err) {
       if (err.response?.status === 403 && err.response?.data?.error === 'User does not have a seller profile') {
+
         navigate('/seller/register');
       } else {
         setError(err.message);

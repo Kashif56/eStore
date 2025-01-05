@@ -9,6 +9,11 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 
 const Footer = () => {
+
+  const hasSellerAccount = localStorage.getItem('hasSellerAccount');
+  const isSellerApproved = localStorage.getItem('isSellerApproved');
+
+
   return (
     <footer className="bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -40,11 +45,19 @@ const Footer = () => {
                   Special Deals
                 </Link>
               </li>
+              {hasSellerAccount && isSellerApproved ? (
+                <li>
+                  <Link to="/seller/dashboard/" className="text-gray-400 hover:text-white text-sm">
+                    Seller Dashboard
+                  </Link>
+                </li>
+              ): 
               <li>
                 <Link to="/seller/register" className="text-gray-400 hover:text-white text-sm">
                   Become a Seller
                 </Link>
               </li>
+              }
             </ul>
           </div>
 

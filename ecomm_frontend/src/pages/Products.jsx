@@ -5,7 +5,8 @@ import {
   faFilter, 
   faSpinner,
   faSort,
-  faTimes
+  faTimes,
+  faMoneyBill
 } from '@fortawesome/free-solid-svg-icons';
 import axiosInstance from '../utils/axiosInstance';
 import Toast from '../components/Toast';
@@ -291,35 +292,53 @@ const Products = () => {
             ))}
 
             {/* Price Range */}
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Price Range</h3>
-              <div className="space-y-4">
+            <div className="bg-white p-5 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                <FontAwesomeIcon icon={faMoneyBill} className="text-indigo-500 mr-2" />
+                Price Range
+              </h3>
+              <div className="space-y-3">
                 <div>
-                  <label className="text-sm text-gray-600">Min Price</label>
-                  <input
-                    type="number"
-                    name="min"
-                    value={priceRange.min}
-                    onChange={handlePriceChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
+                  <label className="text-sm font-medium text-gray-700">Min Price</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">Rs</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="min"
+                      value={priceRange.min}
+                      onChange={(e) => {
+                        handlePriceChange(e);
+                        applyPriceFilter();
+                      }}
+                      placeholder="0"
+                      min="0"
+                      className="block w-full pl-10 pr-3 py-1 text-base rounded-md border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <label className="text-sm text-gray-600">Max Price</label>
-                  <input
-                    type="number"
-                    name="max"
-                    value={priceRange.max}
-                    onChange={handlePriceChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
+                  <label className="text-sm font-medium text-gray-700">Max Price</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">Rs</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="max"
+                      value={priceRange.max}
+                      onChange={(e) => {
+                        handlePriceChange(e);
+                        applyPriceFilter();
+                      }}
+                      placeholder="Any"
+                      min="0"
+                      className="block w-full pl-10 pr-3 py-1 text-gray-900 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
                 </div>
-                <button
-                  onClick={applyPriceFilter}
-                  className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Apply
-                </button>
               </div>
             </div>
 

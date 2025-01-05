@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance';
 import Toast from '../../components/Toast';
+import { setIsSellerApproved } from '../../features/sellerSlice';
 
 const Approval = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Approval = () => {
   const [sellerInfo, setSellerInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -17,6 +19,10 @@ const Approval = () => {
       return;
     }
     fetchSellerInfo();
+    if (sellerInfo && sellerInfo.is_approved) {
+      localStorage.setItem('isSellerApproved', true);
+      navigate('/seller/dashboard/');
+    }
   }, [isAuthenticated, navigate]);
 
   const fetchSellerInfo = async () => {
@@ -24,13 +30,10 @@ const Approval = () => {
       const response = await axiosInstance.get('/api/sellers/profile/');
       if (response.data?.status === 'success') {
         setSellerInfo(response.data.data);
-        if (response.data.data.is_approved) {
-          navigate('/seller/dashboard');
-        }
       } else {
         setToast({
           type: 'error',
-          message: 'Failed to fetch seller information'
+          message: response.data?.data.message || 'Failed to fetch seller information'
         });
       }
     } catch (error) {
@@ -39,7 +42,7 @@ const Approval = () => {
       }
       setToast({
         type: 'error',
-        message: 'Error fetching seller information'
+        message: 'Error fetching seller information - Catch'
       });
     } finally {
       setLoading(false);
@@ -90,6 +93,12 @@ const Approval = () => {
                   <dt className="text-sm font-medium text-gray-500">Registration Date</dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {new Date(sellerInfo.created_at).toLocaleDateString()}
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Approval Status</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {sellerInfo.is_approved ? 'Approved' : 'Pending'}
                   </dd>
                 </div>
               </dl>

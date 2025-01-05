@@ -36,15 +36,13 @@ A modern, full-stack e-commerce platform built with React and Django, featuring 
 - Real-time cart management
 - Wishlist functionality
 - Product reviews and ratings
-- Related products suggestions
 
 #### 3. Cart & Checkout
 - Real-time cart updates
 - Multiple payment options
 - Address management
 - Order tracking
-- Invoice generation
-- Email notifications
+
 
 #### 4. Product Search & Filtering
 - Advanced search functionality
@@ -64,7 +62,6 @@ A modern, full-stack e-commerce platform built with React and Django, featuring 
 #### 2. Product Management
 - Add/Edit/Delete products
 - Manage product variants
-- Bulk product upload
 - Image management
 - Inventory tracking
 
@@ -72,13 +69,10 @@ A modern, full-stack e-commerce platform built with React and Django, featuring 
 - Order processing
 - Order status updates
 - Return/Refund handling
-- Customer communication
 - Shipping management
 
 #### 4. Profile & Settings
 - Business profile management
-- Bank account settings
-- Notification preferences
 - Account deletion
 
 ### Admin Features
@@ -101,7 +95,6 @@ A modern, full-stack e-commerce platform built with React and Django, featuring 
 - Image optimization
 - Lazy loading
 - Code splitting
-- Redis caching
 - API response optimization
 - Debounced search
 - Memoized components

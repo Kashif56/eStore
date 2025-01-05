@@ -18,6 +18,14 @@ import {
   MdRefresh
 } from 'react-icons/md';
 import { 
+  FaBox, 
+  FaShoppingCart as FaShoppingCartAlt, 
+  FaMoneyBillWave, 
+  FaUserClock, 
+  FaMoneyCheckAlt, 
+  FaMoneyBill 
+} from 'react-icons/fa';
+import { 
   fetchDashboardStats, 
   fetchSalesGraphData,
   formatCurrency,
@@ -28,8 +36,7 @@ import {
 } from '../../services/dashboardService';
 import { useNavigate } from 'react-router-dom';
 
-
-
+import axiosInstance from '../../utils/axiosInstance';
 
 
 const TimeFilter = ({ isOpen, onClose, onSelect, currentPeriod }) => {
@@ -165,6 +172,26 @@ const GraphSkeleton = () => (
   </div>
 );
 
+const PayoutStatsCard = ({ title, value, count, icon, color, loading }) => (
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+    <div className="flex items-center">
+      <div className={`p-3 rounded-full ${color} bg-opacity-10 mr-4`}>
+        {icon}
+      </div>
+      <div>
+        <p className="text-sm font-medium text-gray-600">{title}</p>
+        <p className="text-2xl font-semibold text-gray-900">{formatCurrency(value)}</p>
+        <p className="text-sm text-gray-500">{count} Payouts</p>
+      </div>
+    </div>
+    {loading && (
+      <div className="animate-pulse mt-4">
+        <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+      </div>
+    )}
+  </div>
+);
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
@@ -190,7 +217,15 @@ const Dashboard = () => {
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
   const [topProducts, setTopProducts] = useState([]);
   const [topProductsLoading, setTopProductsLoading] = useState(true);
-
+  const [pendingPayout, setPendingPayout] = useState({
+    pendingTotal: 0,
+    pendingPayoutCount: 0
+  });
+  const [paidPayout, setPaidPayout] = useState({
+    paidTotal: 0,
+    paidPayoutCount: 0
+  });
+  const [payoutStatsLoading, setPayoutStatsLoading] = useState(true);
 
   const fetchCardStats = async (card, period) => {
     try {
@@ -257,6 +292,29 @@ const Dashboard = () => {
     }
   };
 
+  const fetchPayoutStatsData = async () => {
+    try {
+      setPayoutStatsLoading(true);
+      const response = await axiosInstance.get('/api/seller-payout-stats/');
+      
+      if (response?.data?.status === 'success' && response.data?.data) {
+        setPendingPayout({pendingTotal: response.data.data.pendingTotal, pendingPayoutCount: response.data.data.pendingCount});
+        setPaidPayout({paidTotal: response.data.data.paidTotal, paidPayoutCount: response.data.data.paidCount});
+      } else {
+        setPendingPayout(0, 0);
+        setPaidPayout(0, 0);
+      }
+      setError(null);
+    } catch (err) {
+      setError(`Error fetching payout stats: ${err.message}`);
+      console.error('Error fetching payout stats:', err);
+      setPendingPayout(0, 0);
+      setPaidPayout(0, 0);
+    } finally {
+      setPayoutStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchAllData = async () => {
       try {
@@ -265,7 +323,8 @@ const Dashboard = () => {
           fetchCardStats('orders'),
           fetchCardStats('average'),
           fetchGraphData(),
-          fetchTopProductsData()
+          fetchTopProductsData(),
+          fetchPayoutStatsData()
         ]);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -327,6 +386,24 @@ const Dashboard = () => {
             onPeriodChange={(period) => handleCardPeriodChange('average', period)}
             loading={cardLoading.average}
             onRefresh={() => fetchCardStats('average')}
+          />
+
+          {/* Payout Stats */}
+          <PayoutStatsCard
+            title="Pending Payouts"
+            value={pendingPayout.pendingTotal}
+            count={pendingPayout.pendingPayoutCount}
+            icon={<FaMoneyCheckAlt size={24} />}
+            color="text-purple-500"
+            loading={payoutStatsLoading}
+          />
+          <PayoutStatsCard
+            title="Paid Payouts"
+            value={paidPayout.paidTotal}
+            count={paidPayout.paidPayoutCount}
+            icon={<FaMoneyBill size={24} />}
+            color="text-indigo-500"
+            loading={payoutStatsLoading}
           />
         </div>
 

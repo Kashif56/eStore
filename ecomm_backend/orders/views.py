@@ -6,11 +6,15 @@ from products.models import Product, ProductVariant
 from .models import Order, OrderItem, Payment, OrderItemStatus, ReturnRequest, ReturnRequestStatus
 from .serializer import OrderSerializer, OrderItemSerializer, PaymentSerializer
 from django.db.models import F, Sum
-from .utils import generate_order_id, generate_order_item_id
+from .utils import generate_order_id, generate_order_item_id, generate_seller_payout_id, createSellerPayout, createMyPayout
 from accounts.models import Address
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import uuid
+
+
+from sellers.models import Seller, SellerPayout
+from sellers.serializer import SellerPayoutSerializer
 
 # Initialize custom payment handler
 
@@ -259,13 +263,21 @@ def checkout(request):
 
             if payment_method == 'cod':
                 payment = Payment.objects.create(
-                    paymentId=f"PAY_{order.orderId}",
+                    paymentId=f"PAY_{item.orderItemId}",
                     user=request.user,
                     orderItem=item, 
                     amount=item.getOrderItemTotal(),
                     paymentMethod='cod',
                   
                 )
+
+                # Creating Seller Payout
+                seller = item.product.seller
+                createSellerPayout(item, item.getOrderItemTotal(), seller)
+
+                # Creating My Payout
+                createMyPayout(item, item.getOrderItemTotal())
+
                 item.paymentDetail = payment
                 item.save()
 
@@ -328,10 +340,17 @@ def process_payment(request):
                     user=request.user,
                     orderItem=orderItem,
                     paymentMethod='Credit/Debit Card',
-                    paymentId=f'DEMO-{orderItem.orderItemId}',
+                    paymentId=f'PAY_{orderItem.orderItemId}',
                     amount=amount,
                     is_paid=True
                 )
+
+                # Creating Seller Payout
+                seller = orderItem.product.seller
+                createSellerPayout(orderItem, amount, seller)
+
+                # Creating My Payout
+                createMyPayout(orderItem, amount)
 
                 orderItem.paymentDetail = newPayment
                 orderItem.save()

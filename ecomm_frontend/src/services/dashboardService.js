@@ -5,7 +5,7 @@ export const formatCurrency = (value) => {
   if (value === null || value === undefined) return '-';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'PKR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value);

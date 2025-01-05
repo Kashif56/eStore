@@ -26,6 +26,11 @@ const Sidebar = () => {
       label: 'Orders'
     },
     {
+      path: '/seller/payouts',
+      icon: <MdShoppingCart size={24} />,
+      label: 'Payouts'
+    },
+    {
       path: '/seller/settings',
       icon: <MdSettings size={24} />,
       label: 'Settings'

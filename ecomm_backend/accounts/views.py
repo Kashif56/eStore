@@ -1,9 +1,10 @@
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from orders.models import OrderItem
 from .models import CustomUser, Address
@@ -129,6 +130,7 @@ def get_user_profile(request):
             'last_name': user.last_name,
             'phone_number': user.phone_number,
             'date_joined': user.date_joined,
+            'date_of_birth': user.date_of_birth,
             'avatar': request.build_absolute_uri(user.avatar.url) if user.avatar else None,
             'last_login': user.last_login,
             'updated_at': user.updated_at,
@@ -243,6 +245,7 @@ def set_default_address(request, address_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def update_avatar(request):
     try:
         if 'avatar' not in request.FILES:
@@ -281,16 +284,45 @@ def update_profile(request):
         
         # Handle date_of_birth separately
         if 'date_of_birth' in data:
-            try:
-                if data['date_of_birth'] and data['date_of_birth'].strip():
-                    user.date_of_birth = data['date_of_birth']
-                else:
-                    user.date_of_birth = None
-            except Exception as e:
-                return Response({
-                    'status': 'error',
-                    'message': 'Invalid date format for date of birth'
-                }, status=400)
+            if data['date_of_birth'] and data['date_of_birth'].strip():
+                # Validate the date format
+                date_str = data['date_of_birth'].strip()
+                
+                # Check if the date matches YYYY-MM-DD format
+                import re
+                if not re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
+                    return Response({
+                        'status': 'error',
+                        'message': 'Invalid date format. Please use YYYY-MM-DD format'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                try:
+                    from datetime import datetime
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                    
+                    # Check if the date is not in the future
+                    current_date = datetime.strptime('2025-01-13', '%Y-%m-%d')
+                    if date_obj > current_date:
+                        return Response({
+                            'status': 'error',
+                            'message': 'Date of birth cannot be in the future'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    # Check if the year is reasonable (e.g., not before 1900)
+                    if date_obj.year < 1900:
+                        return Response({
+                            'status': 'error',
+                            'message': 'Please enter a valid year after 1900'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    user.date_of_birth = date_obj
+                except ValueError:
+                    return Response({
+                        'status': 'error',
+                        'message': 'Invalid date. Please enter a valid date in YYYY-MM-DD format'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.date_of_birth = None
         
         # Validate email uniqueness if changed
         if 'email' in data and data['email'] != user.email:
@@ -315,9 +347,12 @@ def update_profile(request):
                 'phone_number': user.phone_number,
                 'date_joined': user.date_joined,
                 'avatar': request.build_absolute_uri(user.avatar.url) if user.avatar else None,
-                'date_of_birth': user.date_of_birth.isoformat() if user.date_of_birth else None,
+                'date_of_birth': user.date_of_birth.strftime('%Y-%m-%d') if user.date_of_birth else None,
                 'last_login': user.last_login,
-                'updated_at': user.updated_at
+                'updated_at': user.updated_at,
+                'ordersCount': OrderItem.objects.filter(user=request.user, is_ordered=True).count(),
+
+                'reviewsCount': user.reviews.count(),
             }
         })
     except Exception as e:

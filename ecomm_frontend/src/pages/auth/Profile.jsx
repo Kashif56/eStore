@@ -249,9 +249,7 @@ const Profile = () => {
                       <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">Date of Birth</dt>
                         <dd className="mt-1 text-sm text-gray-900">
-                          {userData?.date_of_birth 
-                            ? new Date(userData.date_of_birth).toLocaleDateString()
-                            : '-'}
+                          {userData?.date_of_birth}
                         </dd>
                       </div>
                     </dl>
@@ -309,7 +307,7 @@ const Profile = () => {
         <ProfileEditModal
           isOpen={isProfileEditModalOpen}
           onClose={() => setIsProfileEditModalOpen(false)}
-          onSubmit={handleUpdateProfile}
+          onProfileUpdated={handleUpdateProfile}
           userData={userData}
         />
       )}

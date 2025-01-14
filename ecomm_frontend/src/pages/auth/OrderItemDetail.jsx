@@ -33,6 +33,8 @@ function OrderItemDetail() {
   const [returnDescription, setReturnDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [returnRequest, setReturnRequest] = useState(null);
+
   useEffect(() => {
     axiosInstance
       .get(`api/orders/order-item-detail/${orderItemId}/`)
@@ -40,6 +42,7 @@ function OrderItemDetail() {
         console.log('Order Item Response:', res.data);
         setOrderItem(res.data.data);
         setPaymentDetail(res.data.payment);
+        setReturnRequest(res.data.returnRequest);
        
         setError(null);
       })

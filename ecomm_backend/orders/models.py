@@ -13,8 +13,8 @@ STATUS_CHOICES = (
     ('Delivered', 'Delivered'),
     ('Cancelled', 'Cancelled'),
     ('Return Requested', 'Return Requested'),
-    ('Return Approved', 'Return Approved'),
-    ('Return Rejected', 'Return Rejected'),
+    ('Approved', 'Return Approved'),
+    ('Rejected', 'Return Rejected'),
     ('Returned', 'Returned'),
     ('Refunded', 'Refunded'),
 )
@@ -174,6 +174,7 @@ RETURN_STATUS_CHOICES = (
     ('Returned', 'Returned'),
     ('Rejected', 'Rejected'),
     ('Cancelled', 'Cancelled'),
+    ('Refunded', 'Refunded'),
 )
 
 class ReturnRequestStatus(models.Model):

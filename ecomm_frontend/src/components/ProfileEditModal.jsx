@@ -6,8 +6,27 @@ import axiosInstance from '../utils/axiosInstance';
 const ProfileEditModal = ({ isOpen, onClose, userData, onProfileUpdated }) => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return ''; // Invalid date
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const validateDate = (dateString) => {
+    if (!dateString) return true;
+    // Check if the date matches YYYY-MM-DD format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) return false;
+    
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    if (isNaN(date.getTime())) return false;
+    
+    // Check if date is not in the future
+    const currentDate = new Date('2025-01-13');
+    return date <= currentDate;
   };
 
   const [formData, setFormData] = useState({
@@ -42,6 +61,13 @@ const ProfileEditModal = ({ isOpen, onClose, userData, onProfileUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Validate date format
+    if (!validateDate(formData.date_of_birth)) {
+      setError('Invalid date format for date of birth. Please use YYYY-MM-DD format.');
+      return;
+    }
+
     setLoading(true);
 
     try {

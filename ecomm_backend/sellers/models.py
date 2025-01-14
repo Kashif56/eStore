@@ -30,8 +30,10 @@ class SellerPayout(models.Model):
     transactionId = models.CharField(max_length=100)
     is_paid = models.BooleanField(default=False)
 
+    isRefunded = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.seller.business_name} - {self.amount}"
+        return self.payoutId

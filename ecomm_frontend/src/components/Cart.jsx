@@ -54,7 +54,7 @@ function Cart({ initialCartData, onCartUpdate }) {
 
     setLoading(prev => ({ ...prev, [orderItemId]: true }));
     try {
-      await axiosInstance.put(`/api/orders/update-order-qty/${orderItemId}/`, {
+      await axiosInstance.put(`/api/orders/update-qty/${orderItemId}/`, {
         method: method
       });
 

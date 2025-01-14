@@ -294,7 +294,7 @@ const Products = () => {
                           <MdEdit size={20} />
                         </button>
                         <button
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product.productId)}
                           className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-full transition-colors duration-200"
                         >
                           <MdDelete size={20} />

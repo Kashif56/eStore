@@ -62,14 +62,18 @@ def get_seller_payout_stats(request):
         # Get total pending payouts
         pending_payouts = SellerPayout.objects.filter(
             seller=seller,
-            is_paid=False)
+            is_paid=False,
+            isRefunded=False,
+            orderItem__paymentDetail__is_paid=True)
 
         pendingTotal = sum(payout.amount for payout in pending_payouts)
 
         # Get total paid payouts
         paid_payouts = SellerPayout.objects.filter(
             seller=seller,
-            is_paid=True)
+            is_paid=True,
+            isRefunded=False,
+            orderItem__paymentDetail__is_paid=True)
 
         paidTotal = sum(payout.amount for payout in paid_payouts)
 

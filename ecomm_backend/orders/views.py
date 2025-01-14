@@ -384,6 +384,7 @@ def get_user_orders(request):
         orderItems = OrderItem.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
         orderItemSerializer = OrderItemSerializer(orderItems, many=True)
 
+
       
         return Response({
             'status': 'success',
@@ -405,11 +406,18 @@ def get_order_detail(request, orderItem_id):
         paymentObjSerializer = PaymentSerializer(paymentObj)
         serializer = OrderItemSerializer(order_item)
 
+        returnRequest = ReturnRequest.objects.filter(orderItem=order_item)
+        if returnRequest.exists():
+            returnRequest = returnRequest.first()
+            returnRequestSerializer = ReturnRequestSerializer(returnRequest)
+        else:
+            returnRequestSerializer = None
       
         return Response({
             'status': 'success',
             'data': serializer.data,
-            'payment': paymentObjSerializer.data
+            'payment': paymentObjSerializer.data,
+            'returnRequest': returnRequestSerializer.data if returnRequestSerializer else None
         })
     except OrderItem.DoesNotExist:
         return Response({

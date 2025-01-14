@@ -3,19 +3,22 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django.db.models import Sum, Avg, Count, F
+from django.db.models import Sum, Avg, Count, F, Q
 from django.utils import timezone
 from datetime import timedelta
 from orders.models import OrderItem, ReturnRequest, Refund, ReturnRequestStatus, OrderItemStatus
 from orders.serializer import OrderItemSerializer, ReturnRequestSerializer
-from sellers.models import Seller  # Import Seller model
+from sellers.models import Seller, SellerPayout
 from sellers.serializer import SellerSerializer
 from products.models import Product, ProductAttributes, ProductReview, ProductVariant, Variant, Category, SubCategory, Images
 from rest_framework import status
 from products.serializer import ProductSerializer, SubCategorySerializer
+from django.db import transaction
+
 
 from .utils import generate_product_id
 
+import uuid
 import json
 import os
 
@@ -202,6 +205,7 @@ def addProduct(request):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def updateProduct(request, productId):
     try:
         print(f"Attempting to update product with ID: {productId}")
@@ -356,7 +360,7 @@ def get_dashboard_stats(request):
             start_date = None
         
         # Base queryset
-        order_items = OrderItem.objects.filter(product__seller=seller, is_ordered=True)
+        order_items = OrderItem.objects.filter(product__seller=seller, is_ordered=True, currentStatus__status='Delivered', paymentDetail__is_paid=True)
         if start_date:
             order_items = order_items.filter(created_at__gte=start_date)
         
@@ -458,7 +462,10 @@ def get_sales_graph_data(request):
             for date, sales in sorted(sales_data.items())
         ]
         
-        return Response(formatted_data)
+        return Response({
+            'status': 'success',
+            'data': formatted_data
+        })
     except AttributeError:
         return Response(
             {'error': 'User does not have a seller profile'},
@@ -481,10 +488,35 @@ def get_top_products(request):
     try:
         seller = request.user.seller
         
-        top_products = Product.objects.filter(seller=seller).order_by('-sold')
-        serializer = ProductSerializer(top_products, many=True)
+        # Get top products with their total revenue and orders
+        top_products = Product.objects.filter(seller=seller).annotate(
+            orders=Count('orderitem', filter=Q(orderitem__is_ordered=True)),
+            revenue=Sum(
+                F('orderitem__quantity') * F('orderitem__price'),
+                filter=Q(orderitem__is_ordered=True)
+            )
+        ).order_by('-sold')[:5]  # Limit to top 5 products
         
-        return Response(serializer.data)
+        # Format the response data
+        formatted_products = []
+        for product in top_products:
+            # Get the first image URL for the product
+            image_url = None
+            if product.images.exists():
+                image_url = product.images.first().image.url
+            
+            formatted_products.append({
+                'id': product.id,
+                'name': product.name,
+                'image': image_url,
+                'orders': product.orders or 0,
+                'revenue': float(product.revenue or 0)
+            })
+        
+        return Response({
+            'status': 'success',
+            'data': formatted_products
+        })
     except Seller.DoesNotExist:
         return Response(
             {'error': 'User does not have a seller profile'},
@@ -493,7 +525,7 @@ def get_top_products(request):
     except Exception as e:
         return Response(
             {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            status=500
         )
 
 
@@ -806,6 +838,9 @@ def update_order_status(request, orderItemId):
 
         # Validate shipping details if status is Shipped
         if new_status == 'Shipped':
+            order_item.courier = shipping_details.get('courier') if shipping_details else None
+            order_item.trackingId = shipping_details.get('trackingId') if shipping_details else None
+            
             if not shipping_details or not all(shipping_details.values()):
                 return Response({
                     'status': 'error',
@@ -822,8 +857,8 @@ def update_order_status(request, orderItemId):
 
         # Update current status
         order_item.currentStatus = new_status_obj
-        order_item.courier = shipping_details.get('courier') if shipping_details else None
-        order_item.trackingId = shipping_details.get('trackingId') if shipping_details else None
+
+        
         order_item.save()
 
         # Add to all statuses
@@ -897,7 +932,7 @@ def update_return_request_status(request, orderItemId):
         # Add to all statuses
         order_item.allStatus.add(newOrderItemStatus)
 
-        # Update current status
+        # Update return request status
         return_request.currentStatus = new_status_obj
         if new_status == 'Approved':
             return_request.is_approved = True
@@ -933,10 +968,12 @@ def get_order_item_detail(request, orderItemId):
 
         returnRequestObj = ReturnRequest.objects.filter(orderItem=sellerOrderItem)
         if returnRequestObj.exists():
+            isReturnRequest = True
             returnRequestObj = returnRequestObj.first()
             returnRequestdata = ReturnRequestSerializer(returnRequestObj)
         else:
             returnRequestdata = None
+            isReturnRequest = False
         
             
         
@@ -946,7 +983,7 @@ def get_order_item_detail(request, orderItemId):
             'status': 'success',
             'data': data.data,
             'returnRequest': returnRequestdata.data if returnRequestdata else None,
-            'isReturnRequest': True if returnRequestObj.exists() else False
+            'isReturnRequest': isReturnRequest,
         })
         
     except (OrderItem.DoesNotExist):
@@ -966,13 +1003,18 @@ def get_order_item_detail(request, orderItemId):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def process_refund(request, order_item_id):
     try:
         order_item = OrderItem.objects.get(orderItemId=order_item_id)
         return_request = ReturnRequest.objects.get(orderItem=order_item)
+        
+
+        print(f"Received refund details: amount={request.data.get('amount')}, paymentMethod={request.data.get('paymentMethod')}, transactionId={request.data.get('transactionId')}")
 
         # Create refund record
-        Refund.objects.create(
+        newRefund =Refund.objects.create(
+            refundId=f"REF-{uuid.uuid4().hex[:8].upper()}",
             returnRequest=return_request,
             amount=request.data.get('amount'),
             paymentMethod=request.data.get('paymentMethod'),
@@ -987,6 +1029,8 @@ def process_refund(request, order_item_id):
 
         # Update return request status
         return_request.currentStatus = new_status_obj
+        if new_status == 'Approved':
+            return_request.is_approved = True
         return_request.save()
 
         return_request.allStatus.add(new_status_obj)
@@ -997,8 +1041,15 @@ def process_refund(request, order_item_id):
             status='Refunded'
         )
 
+        # Update SellerPayout
+        seller_payout = SellerPayout.objects.get(orderItem=order_item)
+        seller_payout.isRefunded = True
+        seller_payout.save()
+
+
         # Update order item status
         order_item.currentStatus = new_order_status
+        order_item.refund = newRefund
         order_item.save()
 
         # Add to all statuses
@@ -1015,6 +1066,7 @@ def process_refund(request, order_item_id):
             'message': str(e)
         }, status=404)
     except Exception as e:
+        print(f"Error in process_refund: {str(e)}")
         return Response({
             'status': 'error',
             'message': str(e)

@@ -35,10 +35,11 @@ PLATFORM_FEE = 10 # 10%
 
 def calculate_payouts(amount, platform_fee_percentage):
     # Calculate platform payout
-    platform_payout = amount * (platform_fee_percentage / 100)
+
+    platform_payout = float(amount)  * (float(platform_fee_percentage) / 100)
     
     # Calculate seller payout
-    seller_payout = amount - platform_payout
+    seller_payout = float(amount) - float(platform_payout)
     
     return seller_payout, platform_payout
 

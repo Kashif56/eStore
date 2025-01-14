@@ -74,7 +74,8 @@ const AvatarModal = ({ isOpen, onClose, onAvatarUpdated }) => {
       });
 
       if (response.data.status === 'success') {
-        onAvatarUpdated(response.data.data.avatar_url);
+        // onAvatarUpdated(response.data.data.avatar_url);
+        window.location.reload();
         setSelectedFile(null);
         setPreviewUrl(null);
         onClose();

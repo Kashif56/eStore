@@ -399,6 +399,8 @@ function OrderItemDetail() {
   const [returnRequest, setReturnRequest] = useState(null);
   const [isReturnRequest, setIsReturnRequest] = useState();
 
+  
+
   useEffect(() => {
     fetchOrderDetails();
   }, [orderItemId]);
@@ -412,6 +414,11 @@ function OrderItemDetail() {
         setIsReturnRequest(response.data.isReturnRequest);
         console.log('Return Request:', response.data.returnRequest);
         console.log('Is Return Request:', response.data.isReturnRequest);
+
+        returnRequest?.allStatus?.some(s => 
+          ['Returned', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(s.status)
+        ) && console.log(returnRequest?.currentStatus?.status);
+
 
       }
     } catch (err) {
@@ -561,9 +568,9 @@ function OrderItemDetail() {
       <div className="flex flex-wrap gap-4">
         <button
           onClick={() => setShowStatusModal(true)}
-          disabled={['Cancelled', 'Refunded', 'Delivered'].includes(orderItem?.currentStatus?.status)}
+          disabled={['Cancelled', 'Refunded', 'Delivered', 'Returned', 'Return Rejected', 'Return Approved', 'Return Requested'].includes(orderItem?.currentStatus?.status)}
           className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 
-            ${!['Cancelled', 'Refunded', 'Delivered'].includes(orderItem?.currentStatus?.status)
+            ${!['Cancelled', 'Refunded', 'Delivered', 'Returned', 'Return Rejected', 'Return Approved', 'Return Requested'].includes(orderItem?.currentStatus?.status)
               ? 'bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-400 focus:ring-indigo-500 dark:focus:ring-indigo-300'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-200 cursor-not-allowed'
             }`}
@@ -914,39 +921,45 @@ function OrderItemDetail() {
                                 </div>
                               </div>
                             )}
-                            {['Returned', 'Rejected', 'Refunded', 'Cancelled'].includes(status.status) && 
-                             returnRequest?.currentStatus?.status === status.status && 
-                             returnRequest?.currentStatus?.reason && (
-                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-                                <div className="text-sm">
-                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
-                                  <div className="space-y-2">
-                                    <div>
-                                      <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
-                                      <p className="text-sm text-red-800 dark:text-red-200">
-                                        {returnRequest.currentStatus.reason}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            {['Returned', 'Rejected', 'Refunded', 'Cancelled'].includes(status.status) && 
-                             returnRequest?.allStatus?.find(s => s.status === status.status)?.reason && (
-                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-                                <div className="text-sm">
-                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
-                                  <div className="space-y-2">
-                                    <div>
-                                      <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
-                                      <p className="text-sm text-red-800 dark:text-red-200">
-                                        {returnRequest?.allStatus?.find(s => s.status === status.status)?.reason}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+
+
+                            {['Returned', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status) && 
+ returnRequest?.currentStatus?.status === status.status && (
+  <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
+    <div className="text-sm">
+      <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
+      <div className="space-y-2">
+        <div>
+          <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
+          <p className="text-sm text-red-800 dark:text-red-200">
+            {returnRequest.currentStatus.reason}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{['Returned', 'Return Rejected', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status) && 
+ returnRequest?.allStatus?.find(s => s.status === status.status)?.reason && (
+  <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
+    <div className="text-sm">
+      <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
+      <div className="space-y-2">
+        <div>
+          <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
+          <p className="text-sm text-red-800 dark:text-red-200">
+            {returnRequest.allStatus.find(s => s.status === status.status).reason}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
                             {status.status === 'Shipped' && (
                               <div className="mt-2 bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">

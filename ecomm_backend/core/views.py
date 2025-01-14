@@ -97,7 +97,7 @@ def get_seller_payout_stats(request):
 @permission_classes([IsAuthenticated])
 def sellerPayouts(request):
     try:
-        payouts = SellerPayout.objects.filter(seller=request.user.seller)
+        payouts = SellerPayout.objects.filter(seller=request.user.seller, isRefunded=False, orderItem__paymentDetail__is_paid=True)
         serializer = SellerPayoutSerializer(payouts, many=True)
         return Response({
             'status': 'success',

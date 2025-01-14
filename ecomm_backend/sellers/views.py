@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django.db.models import Sum, Avg, Count, F, Q
+from django.db.models import Sum, Avg, Count, F, Q, Case, When, IntegerField, DecimalField
 from django.utils import timezone
 from datetime import timedelta
 from orders.models import OrderItem, ReturnRequest, Refund, ReturnRequestStatus, OrderItemStatus
@@ -487,45 +487,20 @@ def calculate_trend(current, previous):
 def get_top_products(request):
     try:
         seller = request.user.seller
-        
-        # Get top products with their total revenue and orders
-        top_products = Product.objects.filter(seller=seller).annotate(
-            orders=Count('orderitem', filter=Q(orderitem__is_ordered=True)),
-            revenue=Sum(
-                F('orderitem__quantity') * F('orderitem__price'),
-                filter=Q(orderitem__is_ordered=True)
-            )
-        ).order_by('-sold')[:5]  # Limit to top 5 products
-        
-        # Format the response data
-        formatted_products = []
-        for product in top_products:
-            # Get the first image URL for the product
-            image_url = None
-            if product.images.exists():
-                image_url = product.images.first().image.url
-            
-            formatted_products.append({
-                'id': product.id,
-                'name': product.name,
-                'image': image_url,
-                'orders': product.orders or 0,
-                'revenue': float(product.revenue or 0)
-            })
-        
+
+        topProducts = Product.objects.filter(seller=seller).order_by('-sold')[:5]
+        serializer = ProductSerializer(topProducts, many=True)
         return Response({
             'status': 'success',
-            'data': formatted_products
+            'data': serializer.data
         })
-    except Seller.DoesNotExist:
-        return Response(
-            {'error': 'User does not have a seller profile'},
-            status=status.HTTP_403_FORBIDDEN
-        )
+        
+ 
     except Exception as e:
+        print(f"Error in get_top_products: {str(e)}")
         return Response(
             {'error': str(e)},
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 

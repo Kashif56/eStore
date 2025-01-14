@@ -207,18 +207,28 @@ const TopProductCard = ({ product, loading }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <img
-            src={product.image}
+            src={`http://localhost:8000${product.images?.[0]?.image || '/placeholder-product.png'}`}
             alt={product.name}
-            className="w-12 h-12 rounded-lg object-cover"
+            className="w-25 h-16 rounded-lg object-cover"
           />
           <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">{product.name}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{product.orders} orders</p>
+            <h3
+             
+              className="font-medium text-gray-900 dark:text-white "
+            >
+              {product.name}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{product.sold} Sold</p>
           </div>
         </div>
-        <p className="text-lg font-semibold text-gray-900 dark:text-white">
-          {formatCurrency(product.revenue)}
-        </p>
+        <div className="text-right">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {product.discount_price ? formatCurrency(product.discount_price) : formatCurrency(product.base_price)}
+          </p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            {formatCurrency(product.base_price * product.sold)}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -307,6 +317,7 @@ const Dashboard = () => {
       const response = await fetchTopProducts(period || graphPeriod);
       if (response?.status === 'success' && Array.isArray(response.data)) {
         setTopProducts(response.data);
+        console.log(response.data);
       } else {
         setTopProducts([]);
       }

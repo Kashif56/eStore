@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from products.models import Product, ProductVariant
 from .models import Order, OrderItem, Payment, OrderItemStatus, ReturnRequest, ReturnRequestStatus
-from .serializer import OrderSerializer, OrderItemSerializer, PaymentSerializer
+from .serializer import OrderSerializer, OrderItemSerializer, PaymentSerializer, ReturnRequestSerializer
 from django.db.models import F, Sum
 from .utils import generate_order_id, generate_order_item_id, generate_seller_payout_id, createSellerPayout, createMyPayout
 from accounts.models import Address

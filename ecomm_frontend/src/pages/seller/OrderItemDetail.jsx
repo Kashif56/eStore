@@ -412,12 +412,9 @@ function OrderItemDetail() {
         setOrderItem(response.data.data);
         setReturnRequest(response.data.returnRequest);
         setIsReturnRequest(response.data.isReturnRequest);
-        console.log('Return Request:', response.data.returnRequest);
-        console.log('Is Return Request:', response.data.isReturnRequest);
+       
 
-        returnRequest?.allStatus?.some(s => 
-          ['Returned', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(s.status)
-        ) && console.log(returnRequest?.currentStatus?.status);
+        
 
 
       }

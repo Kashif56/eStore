@@ -919,44 +919,25 @@ function OrderItemDetail() {
                               </div>
                             )}
 
-
-                            {['Returned', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status) && 
- returnRequest?.currentStatus?.status === status.status && (
-  <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-    <div className="text-sm">
-      <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
-          <p className="text-sm text-red-800 dark:text-red-200">
-            {returnRequest.currentStatus.reason}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-{['Returned', 'Return Rejected', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status) && 
- returnRequest?.allStatus?.find(s => s.status === status.status)?.reason && (
-  <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-    <div className="text-sm">
-      <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
-          <p className="text-sm text-red-800 dark:text-red-200">
-            {returnRequest.allStatus.find(s => s.status === status.status).reason}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-
+                            {(['Returned', 'Return Rejected', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status)) && (
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
+                                <div className="text-sm">
+                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
+                                      <p className="text-sm text-red-800 dark:text-red-200">
+                                        {returnRequest?.allStatus?.find(s => 
+                                          s.status === status.status || 
+                                          (status.status.startsWith('Return ') && s.status === status.status.replace('Return ', '')) ||
+                                          (!status.status.startsWith('Return ') && s.status === status.status)
+                                        )?.reason || 'No reason provided'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                             {status.status === 'Shipped' && (
                               <div className="mt-2 bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 space-y-2">
                                 <div className="text-sm">

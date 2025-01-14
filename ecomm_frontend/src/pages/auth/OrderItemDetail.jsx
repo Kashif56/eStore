@@ -195,185 +195,167 @@ function OrderItemDetail() {
             {/* Section 2: Order Item Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              {/* Order Timeline */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  <FontAwesomeIcon icon={faClock} className="mr-2" />
-                  Order Timeline
-                </h2>
-                <div className="flow-root">
-                  <ul className="-mb-8">
-                    {orderItem.allStatus?.map((status, idx) => (
-                      <li key={status.id}>
-                        <div className="relative pb-8">
-                          {idx !== (orderItem.allStatus?.length || 0) - 1 ? (
-                            <span
-                              className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
+              {/* Order Timeline */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <FontAwesomeIcon icon={faClock} className="mr-2" />
+              Order Timeline
+            </h2>
+            <div className="flow-root">
+              <ul className="-mb-8">
+                {orderItem.allStatus?.map((status, idx) => (
+                  <li key={status.id}>
+                    <div className="relative pb-8">
+                      {idx !== (orderItem.allStatus?.length || 0) - 1 ? (
+                        <span
+                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <div className="relative flex space-x-3">
+                        <div>
+                          <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-800 ${
+                            status.status === 'Pending' ? 'bg-yellow-500 dark:bg-yellow-900' :
+                            status.status === 'Processing' ? 'bg-indigo-500 dark:bg-indigo-900' :
+                            status.status === 'Shipped' ? 'bg-blue-500 dark:bg-blue-900' :
+                            status.status === 'Delivered' ? 'bg-green-500 dark:bg-green-900' :
+                            status.status === 'Returned' ? 'bg-red-500 dark:bg-red-900' :
+                            status.status === 'Cancelled' ? 'bg-gray-500 dark:bg-gray-900' :
+                            'bg-gray-400 dark:bg-gray-900'
+                          }`}>
+                            <FontAwesomeIcon 
+                              icon={getStatusIcon(status.status)} 
+                              className="h-4 w-4 text-white"
                               aria-hidden="true"
                             />
-                          ) : null}
-                          <div className="relative flex space-x-3">
-                            <div>
-                              <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-800 ${
-                                status.status === 'Pending' ? 'bg-yellow-500 dark:bg-yellow-900' :
-                                status.status === 'Processing' ? 'bg-indigo-500 dark:bg-indigo-900' :
-                                status.status === 'Shipped' ? 'bg-blue-500 dark:bg-blue-900' :
-                                status.status === 'Delivered' ? 'bg-green-500 dark:bg-green-900' :
-                                status.status === 'Returned' ? 'bg-red-500 dark:bg-red-900' :
-                                status.status === 'Cancelled' ? 'bg-gray-500 dark:bg-gray-900' :
-                                'bg-gray-400 dark:bg-gray-900'
-                              }`}>
-                                <FontAwesomeIcon 
-                                  icon={getStatusIcon(status.status)} 
-                                  className="h-4 w-4 text-white"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {status.status}
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                  {new Date(status.created_at).toLocaleString()}
-                                </p>
-                                {status.status === 'Return Requested' && returnRequest?.reason && (
-                                  <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-                                    <div className="text-sm">
-                                      <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Request Details:</p>
-                                      <div className="space-y-2">
-                                        <div>
-                                          <p className="text-xs text-red-600 dark:text-red-300">Return Reason</p>
-                                          <p className="text-sm text-red-800 dark:text-red-200">{returnRequest?.reason || 'Not specified'}</p>
-                                        </div>
-                                        {returnRequest?.description && (
-                                          <div>
-                                            <p className="text-xs text-red-600 dark:text-red-300">Description</p>
-                                            <p className="text-sm text-red-800 dark:text-red-200">{returnRequest.description}</p>
-                                          </div>
-                                        )}
-                                      </div>
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {status.status}
+                            </p>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(status.created_at).toLocaleString()}
+                            </p>
+                            {status.status === 'Return Requested' && returnRequest?.reason && (
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
+                                <div className="text-sm">
+                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Request Details:</p>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <p className="text-xs text-red-600 dark:text-red-300">Return Reason</p>
+                                      <p className="text-sm text-red-800 dark:text-red-200">{returnRequest?.reason || 'Not specified'}</p>
                                     </div>
-                                  </div>
-                                )}
-
-
-                                {['Returned', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status) && 
-    returnRequest?.currentStatus?.status === status.status && (
-      <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-        <div className="text-sm">
-          <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
-          <div className="space-y-2">
-            <div>
-              <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
-              <p className="text-sm text-red-800 dark:text-red-200">
-                {returnRequest.currentStatus.reason}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-
-    {['Returned', 'Return Rejected', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status) && 
-    returnRequest?.allStatus?.find(s => s.status === status.status)?.reason && (
-      <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-        <div className="text-sm">
-          <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
-          <div className="space-y-2">
-            <div>
-              <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
-              <p className="text-sm text-red-800 dark:text-red-200">
-                {returnRequest.allStatus.find(s => s.status === status.status).reason}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-
-
-
-
-                                {status.status === 'Shipped' && (
-                                  <div className="mt-2 bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 space-y-2">
-                                    <div className="text-sm">
-                                      <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">Shipping Details:</p>
-                                      <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                          <p className="text-xs text-blue-600 dark:text-blue-300">Shipped From</p>
-                                          <p className="text-sm text-blue-800 dark:text-blue-200">{status.shipped_from || 'Not specified'}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-blue-600 dark:text-blue-300">Shipped To</p>
-                                          <p className="text-sm text-blue-800 dark:text-blue-200">{status.shipped_to || 'Not specified'}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-blue-600 dark:text-blue-300">Courier Service</p>
-                                          <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.courier || 'Not specified'}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-blue-600 dark:text-blue-300">Tracking ID</p>
-                                          <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.trackingId || 'Not specified'}</p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                                {status.status === 'Refunded' && orderItem.refund && (
-                                  <div className="mt-2 bg-green-50 dark:bg-green-900/30 rounded-md p-3 space-y-2">
-                                    <div className="text-sm">
-                                      <p className="font-medium text-green-900 dark:text-green-100 mb-2">Refund Details</p>
-                                      <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                          <p className="text-xs text-green-600 dark:text-green-300">Refund ID</p>
-                                          <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.refundId}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-green-600 dark:text-green-300">Amount</p>
-                                          <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.amount}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-green-600 dark:text-green-300">Payment Method</p>
-                                          <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.paymentMethod}</p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-green-600 dark:text-green-300">Transaction ID</p>
-                                          <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.transactionId}</p>
-                                        </div>
-                                        <div className="col-span-2">
-                                          <p className="text-xs text-green-600 dark:text-green-300">Processed On</p>
-                                          <p className="text-sm text-green-800 dark:text-green-200">
-                                            {new Date(orderItem.refund.created_at).toLocaleString()}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                                { returnRequest?.allStatus?.reason && (
-                                  <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
-                                  <div className="text-sm">
-                                    <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Request Details:</p>
-                                    <div className="space-y-2">
+                                    {returnRequest?.description && (
                                       <div>
-                                        <p className="text-xs text-red-600 dark:text-red-300">Return Reason</p>
-                                        <p className="text-sm text-red-800 dark:text-red-200">{returnRequest?.currentStatus?.reason || 'Not specified'}</p>
+                                        <p className="text-xs text-red-600 dark:text-red-300">Description</p>
+                                        <p className="text-sm text-red-800 dark:text-red-200">{returnRequest.description}</p>
                                       </div>
-                                    
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {(['Returned', 'Return Rejected', 'Return Approved', 'Approved', 'Rejected', 'Cancelled'].includes(status.status)) && (
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
+                                <div className="text-sm">
+                                  <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Status Update</p>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <p className="text-xs text-red-600 dark:text-red-300">Status Reason</p>
+                                      <p className="text-sm text-red-800 dark:text-red-200">
+                                        {returnRequest?.allStatus?.find(s => 
+                                          s.status === status.status || 
+                                          (status.status.startsWith('Return ') && s.status === status.status.replace('Return ', '')) ||
+                                          (!status.status.startsWith('Return ') && s.status === status.status)
+                                        )?.reason || 'No reason provided'}
+                                      </p>
                                     </div>
                                   </div>
                                 </div>
-                                )}
+                              </div>
+                            )}
+                            {status.status === 'Shipped' && (
+                              <div className="mt-2 bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 space-y-2">
+                                <div className="text-sm">
+                                  <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">Shipping Details:</p>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Shipped From</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{status.shipped_from || 'Not specified'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Shipped To</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{status.shipped_to || 'Not specified'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Courier Service</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.courier || 'Not specified'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-blue-600 dark:text-blue-300">Tracking ID</p>
+                                      <p className="text-sm text-blue-800 dark:text-blue-200">{orderItem.trackingId || 'Not specified'}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            {status.status === 'Refunded' && orderItem.refund && (
+                              <div className="mt-2 bg-green-50 dark:bg-green-900/30 rounded-md p-3 space-y-2">
+                                <div className="text-sm">
+                                  <p className="font-medium text-green-900 dark:text-green-100 mb-2">Refund Details</p>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Refund ID</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.refundId}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Amount</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">PKR {orderItem.refund.amount}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Payment Method</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.paymentMethod}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-green-600 dark:text-green-300">Transaction ID</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">{orderItem.refund.transactionId}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                      <p className="text-xs text-green-600 dark:text-green-300">Processed On</p>
+                                      <p className="text-sm text-green-800 dark:text-green-200">
+                                        {new Date(orderItem.refund.created_at).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            { returnRequest?.allStatus?.reason && (
+                              <div className="mt-2 bg-red-50 dark:bg-red-900/30 rounded-md p-3 space-y-2">
+                              <div className="text-sm">
+                                <p className="font-medium text-red-900 dark:text-red-100 mb-2">Return Request Details:</p>
+                                <div className="space-y-2">
+                                  <div>
+                                    <p className="text-xs text-red-600 dark:text-red-300">Return Reason</p>
+                                    <p className="text-sm text-red-800 dark:text-red-200">{returnRequest?.currentStatus?.reason || 'Not specified'}</p>
+                                  </div>
+                                
+                                </div>
                               </div>
                             </div>
+                            )}
                           </div>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
 
               {/* Payment Status */}
               <div className="bg-blue-50 p-4 rounded-lg">

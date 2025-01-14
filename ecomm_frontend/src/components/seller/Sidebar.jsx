@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MdDashboard, MdInventory, MdShoppingCart, MdSettings, MdLogout } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdShoppingCart, MdSettings, MdLogout, MdHome } from 'react-icons/md';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../features/authSlice';
 
@@ -10,6 +10,11 @@ const Sidebar = () => {
   const dispatch = useDispatch();
 
   const menuItems = [
+    {
+      path: '/',
+      icon: <MdHome size={24} />,
+      label: 'Main Site'
+    },
     {
       path: '/seller/dashboard',
       icon: <MdDashboard size={24} />,
@@ -38,10 +43,18 @@ const Sidebar = () => {
   ];
 
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
-  };
+    // Clear all auth related data
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    localStorage.removeItem('hasSellerAccount');
+    localStorage.removeItem('isSellerApproved');
 
+  
+    dispatch(logout());
+    navigate('/');
+
+  };
   return (
     <div className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-lg z-20">
       <div className="flex flex-col h-full">

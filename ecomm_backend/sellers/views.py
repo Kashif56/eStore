@@ -822,6 +822,10 @@ def update_order_status(request, orderItemId):
                     'message': 'Shipping details are required for Shipped status'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
+        # Validate shipping details if status is Delivered
+        if new_status == 'Delivered':
+            order_item.paymentDetail.is_paid = True
+
         # Create new status
         new_status_obj = OrderItemStatus.objects.create(
             orderItem=order_item,

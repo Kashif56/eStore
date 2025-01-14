@@ -3,14 +3,29 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MdLightMode, MdDarkMode, MdNotifications, MdAccountCircle, MdExpandMore } from 'react-icons/md';
 import { useTheme } from '../../context/ThemeContext';
 
+import { useDispatch } from 'react-redux';
+import { logout } from '../../features/authSlice';
+
 
 const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
+  const dispatch = useDispatch();
+
   const handleLogout = () => {
-    // Add logout logic here
+    // Clear all auth related data
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    localStorage.removeItem('hasSellerAccount');
+    localStorage.removeItem('isSellerApproved');
+
+  
+    dispatch(logout());
+    navigate('/');
+
   };
 
   return (
@@ -22,7 +37,7 @@ const Navbar = () => {
             to="/seller/dashboard" 
             className="text-xl font-bold text-gray-800 dark:text-white"
           >
-            ECommerce Seller
+            eStore Seller Dashboard
           </Link>
         </div>
 

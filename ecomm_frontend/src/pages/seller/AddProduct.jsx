@@ -23,7 +23,7 @@ const AddProduct = () => {
     subcategory: '',
     stock: '',
     attributes: [{ name: '', value: '' }],
-    variants: [{ name: '', options: [''], price: '', stock: '' }]
+    variants: []
   });
 
   const fetchCategoriesData = async () => {
@@ -152,8 +152,27 @@ const AddProduct = () => {
     });
   };
 
-  const removeVariant = (index) => {
-    const newVariants = formData.variants.filter((_, i) => i !== index);
+  const handleVariantOptionChange = (variantIndex, optionIndex, value) => {
+    const newVariants = [...formData.variants];
+    newVariants[variantIndex].options[optionIndex] = value;
+    setFormData({
+      ...formData,
+      variants: newVariants
+    });
+  };
+
+  const addVariantOption = (variantIndex) => {
+    const newVariants = [...formData.variants];
+    newVariants[variantIndex].options.push('');
+    setFormData({
+      ...formData,
+      variants: newVariants
+    });
+  };
+
+  const removeVariantOption = (variantIndex, optionIndex) => {
+    const newVariants = [...formData.variants];
+    newVariants[variantIndex].options = newVariants[variantIndex].options.filter((_, i) => i !== optionIndex);
     setFormData({
       ...formData,
       variants: newVariants
@@ -432,11 +451,7 @@ const AddProduct = () => {
                   <div className="flex items-center gap-4">
                     <select
                       value={variant.name}
-                      onChange={(e) => {
-                        const newVariants = [...formData.variants];
-                        newVariants[index].name = e.target.value;
-                        setFormData({ ...formData, variants: newVariants });
-                      }}
+                      onChange={(e) => handleVariantChange(index, 'name', e.target.value)}
                       className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
                       <option value="">Select Variant Type</option>
@@ -456,26 +471,21 @@ const AddProduct = () => {
                     </button>
                   </div>
                   <div className="pl-4 space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Options
+                    </label>
                     {variant.options.map((option, optionIndex) => (
                       <div key={optionIndex} className="flex items-center gap-4">
                         <input
                           type="text"
                           value={option}
-                          onChange={(e) => {
-                            const newVariants = [...formData.variants];
-                            newVariants[index].options[optionIndex] = e.target.value;
-                            setFormData({ ...formData, variants: newVariants });
-                          }}
+                          onChange={(e) => handleVariantOptionChange(index, optionIndex, e.target.value)}
                           placeholder="Option Value"
                           className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         />
                         <button
                           type="button"
-                          onClick={() => {
-                            const newVariants = [...formData.variants];
-                            newVariants[index].options = variant.options.filter((_, i) => i !== optionIndex);
-                            setFormData({ ...formData, variants: newVariants });
-                          }}
+                          onClick={() => removeVariantOption(index, optionIndex)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                         >
                           <MdDelete size={20} />
@@ -484,26 +494,43 @@ const AddProduct = () => {
                     ))}
                     <button
                       type="button"
-                      onClick={() => {
-                        const newVariants = [...formData.variants];
-                        newVariants[index].options.push('');
-                        setFormData({ ...formData, variants: newVariants });
-                      }}
-                      className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg"
+                      onClick={() => addVariantOption(index)}
+                      className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2"
                     >
+                      <MdAdd size={20} />
                       Add Option
                     </button>
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Price
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={variant.price}
+                      onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Stock
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={variant.stock}
+                      onChange={(e) => handleVariantChange(index, 'stock', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
                   </div>
                 </div>
               ))}
               <button
                 type="button"
-                onClick={() => {
-                  setFormData({
-                    ...formData,
-                    variants: [...formData.variants, { name: '', options: [''] }]
-                  });
-                }}
+                onClick={addVariant}
                 className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2"
               >
                 <MdCloudUpload size={20} />

@@ -107,185 +107,132 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            {/* Logo */}
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-xl font-bold text-indigo-600">
-                EShop
-              </Link>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                to="/"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Home 
-              </Link>
-              <Link
-                to="/products"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Products 
-              </Link>
-
-              {hasSellerAccount && isSellerApproved && isAuthenticated && (
-                <Link
-                  to="/seller/dashboard"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Dashboard 
-                </Link>
-              )}
-
-            
-            </div>
+          {/* Logo and Brand */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link to="/" className="text-2xl font-bold text-indigo-600">
+              eStore
+            </Link>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 flex items-center justify-center px-2 lg:ml-6 lg:justify-end">
-            <div className="max-w-lg w-full lg:max-w-xs">
-              <form onSubmit={handleSearch} className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
-                </div>
+          {/* Search Bar - Desktop */}
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center max-w-2xl">
+            <form onSubmit={handleSearch} className="w-full">
+              <div className="relative">
                 <input
                   type="text"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full bg-gray-100 rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 />
-              </form>
-            </div>
+                <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500">
+                  <FontAwesomeIcon icon={faSearch} />
+                </button>
+              </div>
+            </form>
           </div>
 
-          {/* Right side icons */}
-          <div className="flex items-center">
-            {isAuthenticated && (
-              <Link
-                to="/cart"
-                className="p-2 text-gray-400 hover:text-blue-500 relative"
-              >
-                <FontAwesomeIcon icon={faShoppingCart} className="h-6 w-6" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-            )}
+          {/* Navigation Items - Desktop */}
+          <div className="hidden sm:flex sm:items-center sm:space-x-8">
+            <Link to="/products" className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+              Products
+            </Link>
+            
+            {/* Cart Icon with Count */}
+            <Link to="/cart" className="relative text-gray-600 hover:text-indigo-600 transition-colors">
+              <FontAwesomeIcon icon={faShoppingCart} className="text-xl" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
+            {/* Profile Menu */}
             {isAuthenticated ? (
-              <div className="relative ml-3">
-                <div className="flex items-center">
-                  <button
-                    className="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onMouseEnter={handleMenuEnter}
-                    onMouseLeave={handleMenuLeave}
-                  >
-                    <FontAwesomeIcon 
-                      icon={faUserCircle} 
-                      className="h-8 w-8 text-gray-400 hover:text-indigo-500 transition-colors" 
-                    />
-                  </button>
-                </div>
+              <div className="relative" onMouseEnter={handleMenuEnter} onMouseLeave={handleMenuLeave}>
+                <button className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600 focus:outline-none">
+                  <FontAwesomeIcon icon={faUserCircle} className="text-xl" />
+                  <span className="font-medium">{username}</span>
+                </button>
+                
                 {showProfileMenu && (
-                  <div 
-                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
-                    onMouseEnter={handleMenuEnter}
-                    onMouseLeave={handleMenuLeave}
-                  >
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-                      Welcome,<br/>
-                      <span className="font-medium text-indigo-600">
-                        {localStorage.getItem('username')}
-                      </span>
-                    </div>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Your Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100 flex items-center space-x-2"
-                    >
-                      <FontAwesomeIcon icon={faSignOutAlt} className="h-4 w-4" />
-                      <span>Sign out</span>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Profile</Link>
+                    <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Orders</Link>
+                    {hasSellerAccount === 'true' && isSellerApproved === 'true' && (
+                      <Link to="/seller/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Seller Dashboard</Link>
+                    )}
+                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                      Logout
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="hidden sm:flex sm:items-center sm:ml-6">
-                <Link
-                  to="/login"
-                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Sign up
-                </Link>
-              </div>
+              <Link to="/login" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                Login
+              </Link>
             )}
+          </div>
 
-            {/* Mobile menu button */}
-            <div className="flex items-center sm:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-              >
-                <FontAwesomeIcon
-                  icon={isMenuOpen ? faTimes : faBars}
-                  className="h-6 w-6"
-                />
-              </button>
-            </div>
+          {/* Mobile menu button */}
+          <div className="flex items-center sm:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-600 hover:text-indigo-600 focus:outline-none"
+            >
+              <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="text-xl" />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
-            <Link
-              to="/"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Home
-            </Link>
-            <Link
-              to="/products"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
+        <div className="sm:hidden bg-white border-t">
+          <div className="px-4 pt-2 pb-3 space-y-1">
+            {/* Search Bar - Mobile */}
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full bg-gray-100 rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                />
+                <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500">
+                  <FontAwesomeIcon icon={faSearch} />
+                </button>
+              </div>
+            </form>
+
+            <Link to="/products" className="block py-2 text-gray-600 hover:text-indigo-600">
               Products
             </Link>
-            {!isAuthenticated && (
+            <Link to="/cart" className="block py-2 text-gray-600 hover:text-indigo-600">
+              Cart ({cartCount})
+            </Link>
+            
+            {isAuthenticated ? (
               <>
-                <Link
-                  to="/login"
-                  className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                >
-                  Sign up
-                </Link>
+                <Link to="/profile" className="block py-2 text-gray-600 hover:text-indigo-600">Profile</Link>
+                <Link to="/orders" className="block py-2 text-gray-600 hover:text-indigo-600">Orders</Link>
+                {hasSellerAccount === 'true' && isSellerApproved === 'true' && (
+                  <Link to="/seller/dashboard" className="block py-2 text-gray-600 hover:text-indigo-600">Seller Dashboard</Link>
+                )}
+                <button onClick={handleLogout} className="block w-full text-left py-2 text-red-600 hover:text-red-700">
+                  Logout
+                </button>
               </>
+            ) : (
+              <Link to="/login" className="block py-2 text-indigo-600 hover:text-indigo-700">
+                Login
+              </Link>
             )}
           </div>
         </div>

@@ -1008,8 +1008,7 @@ def process_refund(request, order_item_id):
 
         # Update return request status
         return_request.currentStatus = new_status_obj
-        if new_status == 'Approved':
-            return_request.is_approved = True
+        return_request.is_approved = True
         return_request.save()
 
         return_request.allStatus.add(new_status_obj)
